@@ -31,6 +31,12 @@ const open = ref(false)
 function edit(ts: any[]) { editing.value = ts; open.value = true }
 function editSelected() { edit((txs.value ?? []).filter(t => selected.value.has(t.id))) }
 async function quick(t: any, patch: Record<string, any>) { await $fetch('/api/transactions', { method: 'PATCH', body: { ids: [t.id], patch } }); saved() }
+const toast = useToast()
+async function blame(t: any) {
+  const r = await $fetch<any>('/api/budgets', { method: 'PUT', body: { blame: t.id } })
+  toast.add({ title: `Added to the ${r.label} budget note`, description: 'Edit the note on the Budget page to say why.', icon: 'i-lucide-notebook-pen' })
+  refreshNuxtData()
+}
 async function saved() { selected.value.clear(); await refresh(); emit('changed'); refreshNuxtData() }
 </script>
 
@@ -86,6 +92,9 @@ async function saved() { selected.value.clear(); await refresh(); emit('changed'
         </UTooltip>
         <UTooltip :text="t.wasteful ? 'Wasteful — click to forgive' : 'Tag as wasteful'">
           <UButton size="xs" variant="ghost" :color="t.wasteful ? 'error' : 'neutral'" icon="i-lucide-flame" :class="t.wasteful ? '' : 'opacity-0 group-hover:opacity-100'" @click="quick(t, { wasteful: !t.wasteful })" />
+        </UTooltip>
+        <UTooltip text="Blame for the budget — add to this period's note">
+          <UButton size="xs" variant="ghost" color="neutral" icon="i-lucide-notebook-pen" class="opacity-0 group-hover:opacity-100" @click="blame(t)" />
         </UTooltip>
         <div class="w-32 text-right text-[15px]"><Money :value="t.amount" /></div>
         </template>
