@@ -37,7 +37,10 @@ const SECTIONS = [
 ]
 const sections = computed(() => SECTIONS.map(s => {
   const rs = rows.value.filter(r => r.tranche === s.key)
-  const groups = SPENDING_GROUPS.map(g => ({ g, rows: rs.filter(r => r.groupId === g.id).sort(bySort[sort.value]) })).filter(x => x.rows.length)
+  const groups = SPENDING_GROUPS.map(g => {
+    const grs = rs.filter(r => r.groupId === g.id).sort(bySort[sort.value])
+    return { g, rows: grs, spent: grs.reduce((a, r) => a + r.spent, 0), budget: grs.reduce((a, r) => a + (r.budget ?? 0), 0), hasBudget: grs.some(r => r.budget != null) }
+  }).filter(x => x.rows.length)
   const spent = rs.reduce((a, r) => a + r.spent, 0), budget = rs.reduce((a, r) => a + (r.budget ?? 0), 0)
   const target = (d.value?.income ?? 0) * s.target
   const ok = s.key === 'none' ? spent === 0 : s.good === 'under' ? spent <= target : spent >= target
@@ -66,6 +69,9 @@ async function copyPrev() { await $fetch('/api/budgets', { method: 'PUT', body: 
 async function useAverages() { for (const r of rows.value) if (r.budget == null && r.avg > 0) await $fetch('/api/budgets', { method: 'PUT', body: { period: d.value.period.key, categoryId: r.categoryId, amount: Math.ceil(r.avg / 50) * 50 } }); refresh() }
 // Quiet by default: grey fill while under; orange a little over (≤10%), red well over.
 const incomeTone = (r: any) => !r.budget ? 'bg-slate-300' : r.total >= r.budget ? 'bg-emerald-500' : r.total >= r.budget * 0.9 ? 'bg-amber-400' : 'bg-rose-500'
+// Spent vs budget difference, e.g. "R350 over" / "R1,200 under".
+const diff = (spent: number, budget: number) => spent > budget ? `${money(spent - budget)} over` : `${money(budget - spent)} under`
+const diffTone = (spent: number, budget: number) => spent > budget ? 'text-rose-600' : 'text-emerald-600'
 const tone = (r: any) => {
   const ref = r.budget ?? r.avg
   if (!ref || r.spent <= ref) return 'bg-slate-300'
@@ -163,16 +169,17 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
               <UBadge color="warning" variant="subtle" icon="i-lucide-triangle-alert" size="sm">budget {{ s.good === 'under' ? 'over' : 'under' }} target by {{ money(Math.abs(s.budget - s.target)) }}</UBadge>
             </UTooltip>
             <span><b>{{ money(s.spent) }}</b><span v-if="s.budget" class="text-muted"> / {{ money(s.budget) }}</span></span>
+            <span v-if="s.budget" class="text-xs" :class="diffTone(s.spent, s.budget)">{{ diff(s.spent, s.budget) }}</span>
           </div>
         </div>
         <StatusBar v-if="s.key !== 'none'" class="mt-2" :value="s.pct" :target="s.target / (d.income || 1)" :color="s.barTone" />
       </div>
 
-      <template v-for="{ g, rows: rs } in s.groups" :key="g.id">
+      <template v-for="{ g, rows: rs, spent: gSpent, budget: gBudget, hasBudget } in s.groups" :key="g.id">
         <template v-if="!collapsed[s.key]">
         <div class="flex items-center justify-between bg-default px-4 py-1.5 border-t border-default text-xs uppercase tracking-wide text-muted">
           <span class="flex items-center gap-1.5"><UIcon :name="g.icon" :class="g.color" class="size-3.5" />{{ g.name }}</span>
-          <span class="tnum"><b class="text-highlighted">{{ money(rs.reduce((a: number, r: any) => a + r.spent, 0)) }}</b><template v-if="rs.some((r: any) => r.budget != null)"> / {{ money(rs.reduce((a: number, r: any) => a + (r.budget ?? 0), 0)) }}</template></span>
+          <span class="tnum"><b class="text-highlighted">{{ money(gSpent) }}</b><template v-if="hasBudget"> / {{ money(gBudget) }} · <span :class="diffTone(gSpent, gBudget)">{{ diff(gSpent, gBudget) }}</span></template></span>
         </div>
         <div v-for="r in rs" :key="r.categoryId + r.tranche" class="grid grid-cols-[1fr_auto_auto] items-center gap-4 px-4 py-2.5 border-t border-default">
           <div class="min-w-0">
