@@ -3,4 +3,5 @@ node_modules
 .output
 .env
 data/*.db*
+!data/randkeeper.mock.db
 data/backups/
