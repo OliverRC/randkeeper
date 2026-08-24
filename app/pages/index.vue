@@ -21,7 +21,10 @@ const histMax = computed(() => Math.max(1, ...hist.value.map((h: any) => Math.ma
         <h1 class="text-xl font-semibold">Overview</h1>
         <p class="text-sm text-muted">Your money, one period at a time.</p>
       </div>
-      <PeriodPicker v-if="o?.periods" :periods="o.periods" :tax-years="o.taxYears" />
+      <div class="flex items-center gap-2">
+        <UButton to="/budget" variant="soft" icon="i-lucide-wallet" label="View budget" />
+        <PeriodPicker v-if="o?.periods" :periods="o.periods" :tax-years="o.taxYears" />
+      </div>
     </div>
 
     <UEmpty v-if="o?.empty" icon="i-lucide-database" title="No transactions yet" description="Hit “Sync bank” in the sidebar to pull your accounts." />
