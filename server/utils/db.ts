@@ -52,7 +52,7 @@ export function db() {
   if (!_db) {
     mkdirSync('data', { recursive: true })
     // One database per bank provider so mock data never mixes with the real ledger.
-    _db = new DatabaseSync(`data/wealth.${useRuntimeConfig().bankProvider || 'mock'}.db`)
+    _db = new DatabaseSync(`data/randkeeper.${useRuntimeConfig().bankProvider || 'mock'}.db`)
     _db.exec('PRAGMA journal_mode = WAL')
     _db.exec(SCHEMA)
     // additive migrations
