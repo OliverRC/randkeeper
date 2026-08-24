@@ -13,11 +13,13 @@ watch(() => p.transactions, async (ts) => {
   const ids = new Set(ts.map(t => t.id))
   for (const m of ms) siblings.value += (await $fetch<any[]>('/api/transactions', { query: { merchant: m } })).filter(t => !ids.has(t.id)).length
 }, { immediate: true })
-const form = reactive({ categoryId: '' as string | null, groupId: '' as string | null, tranche: undefined as string | undefined, wasteful: false, verified: false, flagged: false, note: '', tags: [] as string[], remember: false })
+const form = reactive({ categoryId: '' as string | null, groupId: '' as string | null, tranche: undefined as string | undefined, wasteful: false, verified: false, flagged: false, note: '', tags: [] as string[], remember: false, amount: null as number | null })
+// Split children carry this month's copy of the template amount — editable, extra line rebalances.
+const splitChild = computed(() => !!one.value?.parentId && !one.value.id.endsWith('#extra'))
 watch(() => p.transactions, (ts) => {
   const t = ts[0]
   if (!t) return
-  Object.assign(form, { categoryId: one.value ? t.categoryId : null, groupId: one.value ? t.groupId : null, tranche: one.value ? t.tranche : undefined, wasteful: !!t.wasteful, verified: !!t.verified, flagged: !!t.flagged, note: t.note ?? '', tags: [...(t.tags ?? [])], remember: false })
+  Object.assign(form, { categoryId: one.value ? t.categoryId : null, groupId: one.value ? t.groupId : null, tranche: one.value ? t.tranche : undefined, wasteful: !!t.wasteful, verified: !!t.verified, flagged: !!t.flagged, note: t.note ?? '', tags: [...(t.tags ?? [])], remember: false, amount: one.value?.parentId ? Math.abs(t.amount) : null })
 }, { immediate: true })
 // Changing category re-derives group + tranche (user can still override after).
 watch(() => form.categoryId, (id) => { const c = CATEGORY_BY_ID[id ?? '']; if (c && id !== one.value?.categoryId) { form.groupId = c.group; form.tranche = c.tranche } })
@@ -54,6 +56,7 @@ async function save() {
   if (form.groupId) patch.groupId = form.groupId
   if (form.tranche) patch.tranche = form.tranche
   if (one.value) { patch.note = form.note; patch.tags = form.tags }
+  if (splitChild.value && form.amount != null && form.amount !== Math.abs(one.value.amount)) patch.amount = form.amount
   else if (form.tags.length) patch.tags = form.tags
   if (one.value && one.value.amount > 0 && (linkedId.value ?? null) !== (one.value.linkedId ?? null)) { await link(); delete patch.categoryId; delete patch.groupId; delete patch.tranche }
   await $fetch('/api/transactions', { method: 'PATCH', body: { ids: p.transactions.map(t => t.id), patch, remember: form.remember } })
@@ -68,6 +71,9 @@ async function save() {
           <div class="text-sm text-muted">{{ fmtDate(one.date) }}</div>
           <Money :value="one.amount" class="text-lg" />
         </div>
+        <UFormField v-if="splitChild" label="This month's amount" help="Only this transaction's split line — the “extra” line rebalances so the total still matches the bank. The template's defaults are unchanged.">
+          <UInputNumber v-model="form.amount" :min="0" :step="50" :step-snapping="false" :format-options="{ style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }" class="w-full" />
+        </UFormField>
         <UFormField v-if="one && one.amount > 0" label="Reimburses" help="Link this money-in to the expense it pays back; the pair nets to zero in budgets and 50/30/20.">
           <div class="flex gap-1">
             <USelectMenu v-model="linkedId" v-model:search-term="candQ" ignore-filter :items="candidateItems" value-key="value" placeholder="Not a reimbursement — search any expense" class="flex-1" :ui="{ content: 'min-w-96' }" />

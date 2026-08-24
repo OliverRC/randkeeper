@@ -37,10 +37,14 @@ export function materialise(tx: { id: string; accountId: string; date: string; a
   }
 }
 
-/** Re-apply a template to every matching parent (used after editing the template). */
+/**
+ * Apply a template to matching parents that aren't split yet. Template amounts are defaults,
+ * locked into each transaction at apply time — editing the template never rewrites months
+ * already split; those are adjusted on the transaction itself.
+ */
 export function applySplit(sp: Split) {
   let n = 0
-  for (const t of all(`SELECT id, accountId, date, amount, description FROM transactions WHERE parentId IS NULL AND lower(description) LIKE ?`, `%${sp.pattern.toLowerCase()}%`)) { materialise(t, sp); n++ }
+  for (const t of all(`SELECT id, accountId, date, amount, description FROM transactions WHERE parentId IS NULL AND COALESCE(groupId, '') != 'split' AND lower(description) LIKE ?`, `%${sp.pattern.toLowerCase()}%`)) { materialise(t, sp); n++ }
   return n
 }
 

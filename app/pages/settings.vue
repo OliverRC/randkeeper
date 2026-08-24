@@ -20,7 +20,7 @@ const spTotal = computed(() => sp.lines.reduce((a, l) => a + (Number(l.amount) |
 async function saveSplit() {
   const r = await $fetch<any>('/api/splits', { method: 'POST', body: sp })
   spOpen.value = false; refreshSplits(); refreshNuxtData()
-  toast.add({ title: `Split applied to ${r.applied} transaction${r.applied === 1 ? '' : 's'}`, icon: 'i-lucide-split' })
+  toast.add({ title: r.applied ? `Split applied to ${r.applied} new transaction${r.applied === 1 ? '' : 's'}` : 'Saved — already-split months keep their own amounts', icon: 'i-lucide-split' })
 }
 async function delSplit(id: number) { await $fetch('/api/splits', { method: 'DELETE', body: { id } }); refreshSplits(); refreshNuxtData() }
 const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 } as const
@@ -99,7 +99,7 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
             <UFormField label="Name"><UInput v-model="sp.name" placeholder="Joint Account" class="w-full" /></UFormField>
           </div>
           <div class="space-y-2">
-            <div class="grid grid-cols-[1fr_1fr_8rem_2rem] gap-2 text-xs text-muted px-1"><span>Line</span><span>Category</span><span class="text-right">Amount</span><span /></div>
+            <div class="grid grid-cols-[1fr_1fr_8rem_2rem] gap-2 text-xs text-muted px-1"><span>Line</span><span>Category</span><span class="text-right">Default amount</span><span /></div>
             <div v-for="(l, i) in sp.lines" :key="i" class="grid grid-cols-[1fr_1fr_8rem_2rem] gap-2 items-center">
               <UInput v-model="l.label" placeholder="Rent" size="sm" />
               <CategorySelect v-model="l.categoryId" />
@@ -112,6 +112,7 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
             <UFormField label="Leftover goes to" class="flex items-center gap-2" :ui="{ label: 'text-xs text-muted' }"><CategorySelect v-model="sp.extraCategoryId" class="w-56" /></UFormField>
             <div class="tnum">Lines total <b>{{ money(spTotal) }}</b></div>
           </div>
+          <p class="text-xs text-muted">These amounts are defaults, stamped onto each matching transaction when it's first split. Months already split keep their own copy — adjust those on the transaction itself, in Transactions.</p>
         </div>
       </template>
       <template #footer><div class="flex justify-end gap-2 w-full"><UButton variant="ghost" color="neutral" label="Cancel" @click="spOpen = false" /><UButton label="Save & apply" @click="saveSplit" /></div></template>

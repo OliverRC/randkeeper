@@ -58,7 +58,7 @@ async function saved() { selected.value.clear(); await refresh(); emit('changed'
           <MerchantAvatar :name="t.merchant || t.description" />
           <div class="flex-1 min-w-0">
             <div class="truncate text-[15px]"><span class="font-medium text-highlighted">{{ t.merchant || t.description }}</span><span class="text-muted"> – {{ t.description }}</span></div>
-            <div class="text-xs text-muted mt-0.5">Split into {{ list.filter((c: any) => c.parentId === t.id).length }} lines below · <NuxtLink to="/settings" class="text-primary">edit template</NuxtLink></div>
+            <div class="text-xs text-muted mt-0.5">Split into {{ list.filter((c: any) => c.parentId === t.id).length }} lines below — click a line to adjust this month's amounts · <NuxtLink to="/settings" class="text-primary">template</NuxtLink></div>
           </div>
           <div class="w-32 text-right text-[15px]"><Money :value="t.amount" muted /></div>
         </template>
