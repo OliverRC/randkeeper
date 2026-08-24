@@ -56,11 +56,12 @@ Link a goal to a category and every matching transaction since the start date co
 
 ```sh
 pnpm install
-pnpm dev          # http://localhost:4100
+pnpm dev          # http://localhost:4100 — your configured provider
+pnpm demo         # http://localhost:4101 — mock data, runs alongside dev
 ```
 
 1. Log in with the email in `NUXT_OWNER_EMAIL` (see `.env.example`). The 6-digit code is printed in the terminal (no email provider yet).
-2. Hit **Sync bank** in the sidebar. With `NUXT_BANK_PROVIDER=mock` (the default) this loads ~6 months of fake data.
+2. Hit **Sync bank** in the sidebar. With `NUXT_BANK_PROVIDER=mock` (the default, and always the case for `pnpm demo`) this loads ~6 months of fake data. In demo mode the sidebar shows a **Demo** badge.
 
 ### Connecting Investec
 
