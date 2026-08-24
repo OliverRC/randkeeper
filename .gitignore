@@ -3,3 +3,4 @@ node_modules
 .output
 .env
 data/*.db*
+data/backups/
