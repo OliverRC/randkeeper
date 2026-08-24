@@ -10,7 +10,16 @@ async function save() { await $fetch('/api/settings', { method: 'PUT', body: { .
 const rule = reactive({ pattern: '', categoryId: null as string | null, wasteful: false })
 async function addRule() { if (!rule.pattern || !rule.categoryId) return; await $fetch('/api/rules', { method: 'POST', body: rule }); Object.assign(rule, { pattern: '', categoryId: null, wasteful: false }); refreshRules() }
 async function delRule(id: number) { await $fetch('/api/rules', { method: 'DELETE', body: { id } }); refreshRules() }
-async function apply() { const r = await $fetch('/api/rules-apply', { method: 'POST' }); toast.add({ title: `${r.updated} transactions re-categorised`, icon: 'i-lucide-wand-sparkles' }); refreshNuxtData() }
+// Re-run scope: everything, one budget period, or one tax year.
+const { data: pds } = await useFetch('/api/periods')
+const applyScope = ref('all')
+const scopeItems = computed(() => [
+  { label: 'All time', value: 'all' },
+  ...(pds.value?.taxYears?.length ? [{ type: 'label' as const, label: 'Tax years' }, ...pds.value.taxYears.map((x: any) => ({ label: x.label, value: x.key }))] : []),
+  { type: 'label' as const, label: 'Budget periods' },
+  ...(pds.value?.periods ?? []).map((x: any) => ({ label: x.label, value: x.key })),
+])
+async function apply() { const r = await $fetch('/api/rules-apply', { method: 'POST', body: applyScope.value === 'all' ? {} : { period: applyScope.value } }); toast.add({ title: `${r.updated} transactions re-categorised`, icon: 'i-lucide-wand-sparkles' }); refreshNuxtData() }
 const { data: splits, refresh: refreshSplits } = await useFetch('/api/splits')
 const spOpen = ref(false)
 const sp = reactive({ id: undefined as number | undefined, pattern: '', name: '', extraCategoryId: 'shared-expenses', lines: [] as { label: string; categoryId: string | null; amount: number }[] })
@@ -48,7 +57,10 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
       <template #header>
         <div class="flex items-center justify-between">
           <div><div class="font-semibold">Categorisation rules</div><div class="text-xs text-muted">If a description contains the pattern, the category is applied on sync. Yours win over the {{ rules?.builtin.length }} built-ins.</div></div>
-          <UButton size="sm" variant="soft" icon="i-lucide-wand-sparkles" label="Re-run on unverified" @click="apply" />
+          <div class="flex items-center gap-2">
+            <USelectMenu v-model="applyScope" :items="scopeItems" value-key="value" :search-input="false" size="sm" class="w-44" />
+            <UButton size="sm" variant="soft" icon="i-lucide-wand-sparkles" label="Re-run on unverified" @click="apply" />
+          </div>
         </div>
       </template>
       <div class="flex gap-2 mb-4">
