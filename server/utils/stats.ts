@@ -43,7 +43,6 @@ export function taxEfficiency(period: Period, settings: Record<string, any>) {
   const rate = settings.marginalTaxRate ?? 0
   const tfsaYtd = categorySum('tax-free-savings-tfsa', tyStart, period.end)
   const tfsaPeriod = categorySum('tax-free-savings-tfsa', period.start, period.end)
-  const childYtd = categorySum('blake-s-tfsa', tyStart, period.end)
   return {
     taxYearStart: tyStart,
     // Always the tax year that contains the selected period — the card doesn't change month to month.
@@ -55,6 +54,5 @@ export function taxEfficiency(period: Period, settings: Record<string, any>) {
       pct: settings.tfsaAnnualCap ? tfsaYtd / settings.tfsaAnnualCap : 0,
       onTrack: settings.tfsaAnnualCap * Math.min(12, monthsIn) / 12,
     },
-    child: { ytd: childYtd, cap: settings.tfsaAnnualCap, pct: settings.tfsaAnnualCap ? childYtd / settings.tfsaAnnualCap : 0, onTrack: settings.tfsaAnnualCap * Math.min(12, monthsIn) / 12 },
   }
 }

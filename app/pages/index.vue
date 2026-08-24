@@ -75,7 +75,6 @@ const histMax = computed(() => Math.max(1, ...hist.value.map((h: any) => Math.ma
           <div class="space-y-5">
             <StatusBar label="Retirement annuity (year to date)" :sub="`${money(o.tax.ra.ytd)} of ${money(o.tax.ra.annualCap)}`" :value="o.tax.ra.ytdPct" :target="o.tax.ra.onTrack / o.tax.ra.annualCap" :color="o.tax.ra.ytd >= o.tax.ra.onTrack ? 'bg-emerald-500' : 'bg-indigo-500'" />
             <StatusBar label="TFSA (year to date)" :sub="`${money(o.tax.tfsa.ytd)} of ${money(o.tax.tfsa.cap)}`" :value="o.tax.tfsa.pct" :target="o.tax.tfsa.onTrack / o.tax.tfsa.cap" :color="o.tax.tfsa.ytd >= o.tax.tfsa.onTrack ? 'bg-emerald-500' : 'bg-indigo-500'" />
-            <StatusBar label="Blake's TFSA (year to date)" :sub="`${money(o.tax.child.ytd)} of ${money(o.tax.child.cap)}`" :value="o.tax.child.pct" :target="o.tax.child.onTrack / o.tax.child.cap" :color="o.tax.child.ytd >= o.tax.child.onTrack ? 'bg-emerald-500' : 'bg-indigo-500'" />
             <div class="rounded-lg bg-elevated p-3 text-sm">
               <div class="flex justify-between"><span class="text-muted">RA tax rebate so far</span><span class="tnum font-medium">{{ money(o.tax.ra.rebateSoFar) }}</span></div>
               <div class="flex justify-between mt-1"><span class="text-muted">Projected at year end</span><span class="tnum font-semibold text-emerald-600">{{ money(o.tax.ra.rebateProjected) }}</span></div>
