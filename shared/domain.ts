@@ -155,7 +155,7 @@ export function taxYearStart(d: Date): string {
 }
 
 export const DEFAULT_SETTINGS = {
-  raAnnualCap: 350000,     // 27.5% of taxable income, max R350k p.a. (SARS quotes the annual figure)
+  raAnnualCap: 430000,     // 27.5% of taxable income, max R430k p.a. from 1 March 2026 (Budget 2026; was R350k)
   tfsaAnnualCap: 46000,    // per docs/IDEA.md; verify against SARS for the current tax year
   emergencyFundMonths: 1,
   marginalTaxRate: 0.41,   // your top SARS bracket; RA contributions are deducted at this rate
