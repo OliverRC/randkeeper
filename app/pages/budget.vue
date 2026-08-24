@@ -13,6 +13,22 @@ const rows = computed(() => {
   }
   return list
 })
+// Sort within each spending group, remembered per browser.
+const sortItems = [
+  { label: 'Biggest first', value: 'desc' },
+  { label: 'Smallest first', value: 'asc' },
+  { label: 'A to Z', value: 'alpha' },
+]
+const sort = ref('desc')
+try { sort.value = localStorage.getItem('budget.sort') || 'desc' } catch {}
+watch(sort, v => { try { localStorage.setItem('budget.sort', v) } catch {} })
+const catName = (r: any) => CATEGORY_BY_ID[r.categoryId]?.name ?? r.categoryId
+const amt = (r: any) => r.budget ?? r.spent ?? r.total ?? 0
+const bySort: Record<string, (a: any, b: any) => number> = {
+  desc: (a, b) => amt(b) - amt(a),
+  asc: (a, b) => amt(a) - amt(b),
+  alpha: (a, b) => catName(a).localeCompare(catName(b)),
+}
 const SECTIONS = [
   { key: 'needs', ...TRANCHES.needs, tone: 'bg-sky-500', text: 'text-sky-600' },
   { key: 'wants', ...TRANCHES.wants, tone: 'bg-amber-500', text: 'text-amber-600' },
@@ -21,7 +37,7 @@ const SECTIONS = [
 ]
 const sections = computed(() => SECTIONS.map(s => {
   const rs = rows.value.filter(r => r.tranche === s.key)
-  const groups = SPENDING_GROUPS.map(g => ({ g, rows: rs.filter(r => r.groupId === g.id).sort((a, b) => (b.budget ?? b.spent) - (a.budget ?? a.spent)) })).filter(x => x.rows.length)
+  const groups = SPENDING_GROUPS.map(g => ({ g, rows: rs.filter(r => r.groupId === g.id).sort(bySort[sort.value]) })).filter(x => x.rows.length)
   const spent = rs.reduce((a, r) => a + r.spent, 0), budget = rs.reduce((a, r) => a + (r.budget ?? 0), 0)
   const target = (d.value?.income ?? 0) * s.target
   const ok = s.key === 'none' ? spent === 0 : s.good === 'under' ? spent <= target : spent >= target
@@ -32,7 +48,7 @@ const sections = computed(() => SECTIONS.map(s => {
 const totalSpent = computed(() => rows.value.reduce((a, r) => a + r.spent, 0))
 const totalBudget = computed(() => rows.value.reduce((a, r) => a + (r.budget ?? 0), 0))
 const incomeBudget = computed(() => (d.value?.incomeRows ?? []).reduce((a: number, r: any) => a + (r.budget ?? 0), 0))
-const incomeGroups = computed(() => SPENDING_GROUPS.map(g => ({ g, rows: (d.value?.incomeRows ?? []).filter((r: any) => r.groupId === g.id) })).filter(x => x.rows.length))
+const incomeGroups = computed(() => SPENDING_GROUPS.map(g => ({ g, rows: (d.value?.incomeRows ?? []).filter((r: any) => r.groupId === g.id).sort(bySort[sort.value]) })).filter(x => x.rows.length))
 
 // Optimistic: update the row locally at once, write after the user stops typing, refetch once.
 const timers: Record<string, ReturnType<typeof setTimeout>> = {}
@@ -78,6 +94,7 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
         <UButton size="sm" variant="soft" icon="i-lucide-wand-sparkles" label="Fill from average" @click="useAverages" />
         <UButton size="sm" variant="soft" icon="i-lucide-history" label="Copy to earlier periods" @click="spreadBack" />
         <UCheckbox v-model="showAll" label="All categories" size="sm" />
+        <USelect v-model="sort" :items="sortItems" size="sm" class="w-36" icon="i-lucide-arrow-up-down" />
         <PeriodPicker v-if="d?.periods" :periods="d.periods" :tax-years="d.taxYears" />
       </div>
     </div>
