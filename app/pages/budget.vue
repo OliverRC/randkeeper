@@ -69,8 +69,8 @@ async function copyPrev() { await $fetch('/api/budgets', { method: 'PUT', body: 
 async function useAverages() { for (const r of rows.value) if (r.budget == null && r.avg > 0) await $fetch('/api/budgets', { method: 'PUT', body: { period: d.value.period.key, categoryId: r.categoryId, amount: Math.ceil(r.avg / 50) * 50 } }); refresh() }
 // Quiet by default: grey fill while under; orange a little over (≤10%), red well over.
 const incomeTone = (r: any) => !r.budget ? 'bg-slate-300' : r.total >= r.budget ? 'bg-emerald-500' : r.total >= r.budget * 0.9 ? 'bg-amber-400' : 'bg-rose-500'
-// Spent vs budget difference, e.g. "R350 over" / "R1,200 under".
-const diff = (spent: number, budget: number) => spent > budget ? `${money(spent - budget)} over` : `${money(budget - spent)} under`
+// Spent vs budget difference, e.g. "+R350" (over) / "−R1,200" (under).
+const diff = (spent: number, budget: number) => spent > budget ? `+${money(spent - budget)}` : `−${money(budget - spent)}`
 const diffTone = (spent: number, budget: number) => spent > budget ? 'text-rose-600' : 'text-emerald-600'
 const tone = (r: any) => {
   const ref = r.budget ?? r.avg
