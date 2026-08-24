@@ -4,6 +4,8 @@ export default defineNuxtConfig({
   modules: ['@nuxt/ui', 'nuxt-auth-utils'],
   css: ['~/assets/css/main.css'],
   colorMode: { preference: 'light', fallback: 'light' },
+  // Explicit beats auto-discovery: SSR "failed to load icon lucide:*" warnings when the scan goes stale.
+  icon: { serverBundle: { collections: ['lucide'] } },
   runtimeConfig: {
     // Only this address may log in. Set in .env.
     ownerEmail: '',
