@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_input.command // \"\"' | grep -qE 'server/utils/db\\.ts$|sqlite3 .*wealth.*\\.db|rm .*data/wealth' && cd \"$CLAUDE_PROJECT_DIR\" && mkdir -p data/backups && for f in data/wealth.*.db; do [ -f \"$f\" ] && sqlite3 \"$f\" \".backup 'data/backups/$(basename \"$f\" .db).$(date +%Y%m%d-%H%M%S).db'\"; done 2>/dev/null; true",
+            "statusMessage": "Backing up SQLite db before schema/db change"
+          }
+        ]
+      }
+    ]
+  }
+}
