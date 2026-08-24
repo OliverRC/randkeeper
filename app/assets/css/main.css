@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Tabular figures everywhere money is shown */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Minimal styling for rendered markdown notes (no typography plugin). */
+.note { font-size: 0.875rem; line-height: 1.5; }
+.note > * + * { margin-top: 0.5rem; }
+.note h1, .note h2, .note h3 { font-weight: 600; }
+.note h1 { font-size: 1.125rem; } .note h2 { font-size: 1rem; } .note h3 { font-size: 0.9375rem; }
+.note ul { list-style: disc; padding-left: 1.25rem; } .note ol { list-style: decimal; padding-left: 1.25rem; }
+.note a { color: var(--ui-primary); text-decoration: underline; }
+.note code { font-size: 0.8em; background: var(--ui-bg-elevated); padding: 0.1em 0.35em; border-radius: 0.25rem; }
+.note blockquote { border-left: 3px solid var(--ui-border); padding-left: 0.75rem; color: var(--ui-text-muted); }
+.note input[type=checkbox] { margin-right: 0.4rem; }

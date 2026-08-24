@@ -1,0 +1,3226 @@
+openapi: 3.0.0
+servers:
+  - url: https://openapi.investec.com
+    description: Production environment
+  - url: https://openapisandbox.investec.com
+    description: Sandbox environment
+info:
+  version: 1.0.0
+  title: Private Bank API
+  description: |
+    # Overview
+    This collection of API endpoints enables you to access data and perform actions on your Investec Private Bank account, whether for **personal or business use**. With these APIs, you can:
+    - Retrieve a list of your accounts
+    - Check account balances
+    - Get your transaction history 
+    - Get a list of your Investec Online Banking profiles 
+    - Access your list of beneficiaries
+    - Make payments to beneficiaries
+    - Get details on who is a listed authoriser and the authorisation period (typically for business payments)
+    - Transfer funds between accounts
+    - Download PDF documents such as account statements and tax certificates
+
+     # Authentication
+
+     <details><summary><strong> View Authentication details</strong></summary> 
+
+    - Investec API authentication uses **OAuth 2.0 client credentials** (`client_id` and `client_secret`), with the addition of an `x-api-key`. 
+    - Log in to Investec Online to get your `client_id` and `client_secret` and to generate your `x-api key` with the scopes you require.
+
+     **1. Get an access token**
+
+    - To get an access token, you must exchange your `client_id`, `client_secret` and `x-api key` for the token 
+
+    ```bash
+    curl --location 'https://openapi.investec.com/identity/v2/oauth2/token' \
+    --header 'x-api-key: <<your_api_key>>' \
+    --header 'Authorization: Basic <<base64(client_id:client_secret)>>' \
+    --header 'Content-Type: application/x-www-form-urlencoded' \
+    --data-urlencode 'grant_type=client_credentials'
+    ```
+
+    **Headers explained:**
+    - `x-api-key`: API key generated on Investec Online
+    - `Authorization`: Base64-encoded `client_id:client_secret`. Take your `client_id` and `client_secret` and base64 encode them to provide a value for basic authorization.
+    - `Content-Type`: Indicates the request body format
+
+    **2. Use the token for all API requests**
+
+    - Use the access token that you receive in all subsequent API requests 
+    - Access tokens are **valid for 30 minutes** and must be refreshed when expired 
+
+    ```bash
+    curl --location 'https://openapi.investec.com/...' \
+    --header 'Authorization: Bearer <<your_access_token>>'
+    ```
+
+     **Notes**
+    - Ensure your API key has the required scopes - you can set these when you create the key on Investec Online.
+
+    </details>
+
+     # Quickstarts
+
+    <details>
+    <summary><strong>View Quickstart (cURL)</strong></summary>
+
+     This Quickstart walks you through making your first successful API call to the Private Bank API endpoints. By the end of this guide, you will:
+    - Authenticate using OAuth 2.0 client credentials and your x-api key 
+    - Call the Get Accounts endpoint 
+    - Receive an HTTP 200 OK response with a list of your accounts linked to your Investec Private Bank profile.
+
+     **Before you start** 
+
+    Make sure you have the following: 
+    - An **Investec Private Individual** or **Private Business** account or optionally use the Sandbox 
+    - You have enrolled for Investec Developer on Investec Online (not required if using Sandbox) 
+    - You have your client_id and client_secret from Investec Online and have created an API key (see [Sandbox](#Sandbox) section for sandbox keys) 
+    - API key scopes include at least “accounts” (not required for Sandbox) 
+    - An API client such as Postman, Curl or your own application code.
+
+     **Choose your environment** 
+
+     You can make your first call in either sandbox or production. The flow is identical. The Sandbox API will return mock data, and all actions can be run multiple times. 
+
+     Keep in mind that the sandbox is stateless and therefore, for example, balances won’t be updated when transfers are made in the sandbox. 
+
+     **Sandbox**
+
+     Use this for development and testing.
+
+    **Base API URL**: https://openapisandbox.investec.com 
+
+    **Production**
+
+     Use this when you are ready to connect to your live account data.
+
+     **Base API URL**:https://openapi.investec.com 
+
+     **Step 1: Get an access token** 
+
+     All Private Bank APIs use OAuth 2.0 with the client credentials grant type.
+
+     The client_id and client_secret are combined and Base64 encoded to create the value used in the Authorization header as Basic {base64_value}.
+
+     You must include:
+    - HTTP Basic Auth (client_id:client_secret) 
+    - Your x-api key 
+
+     **Token request** 
+
+    ```bash
+    curl --location 'https://openapisandbox.investec.com/identity/v2/oauth2/token' \
+    --header 'x-api-key: <<your api_key>>' \
+    --header 'Accept: application/json' \
+    --header 'Content-Type: application/x-www-form-urlencoded' \
+    --header 'Authorization: Basic <<client_id:client_secret>>' \
+    --data-urlencode 'grant_type=client_credentials'
+    ```
+
+     **What this does**
+
+    - Authenticates your application 
+    - Returns a short-lived access token called a bearer token (valid for 30 minutes) 
+    - Confirms your credentials and API key are valid 
+
+     **Successful response example** 
+
+    ```json
+    {
+      "access_token": "qwertyuiop123456789",
+      "token_type": "Bearer",
+      "expires_in": 1799,
+      "scope": "accounts"
+    }
+    ```
+
+     **Step 2: Get your accounts** 
+
+     Now that you have a token, you can call the Private Bank API accounts endpoint. 
+
+    **Sandbox** 
+
+    https://openapisandbox.investec.com/za/pb/v1/accounts 
+
+     **Production**
+
+    https://openapi.investec.com/za/pb/v1/accounts
+
+     **Request example** 
+
+     
+
+    ```bash
+    curl --location 'https://openapisandbox.investec.com/za/pb/v1/accounts' \
+      --header 'Accept: application/json' \
+      --header 'Authorization: Bearer <<your access token>>'
+    ```
+
+     **What a successful call looks like (HTTP 200 OK)** 
+
+     If everything is set up correctly, you will receive HTTP 200 OK and a JSON response containing your accounts.
+
+    **Successful response example**
+
+
+
+    ```json
+    {
+      "data": {
+        "accounts": [
+          {
+            "accountId": "123456789",
+            "accountNumber": "1234567890",
+            "accountName": "Primary Private Bank Account",
+            "referenceName": "Main Account",
+            "productName": "Private Bank Cheque",
+            "kycCompliant": true,
+            "profileId": "ABCDEF"
+          }
+        ]
+      },
+      "links": {
+        "self": "https://openapisandbox.investec.com/za/pb/v1/accounts"
+      },
+      "meta": {
+        "totalPages": 1
+      }
+    }
+    ```
+
+    This confirms that your authentication flow is working, your API key has the correct scopes, and you can successfully access Private Bank account data.
+
+     **Step 3: How to debug your first call** 
+
+     **Common issues on a first call**
+
+    | Issue | Guidance |
+    |-------|----------|
+    | Token request fails | Ensure you are using HTTP Basic Auth and that the x-api-key is included |
+    | 401 response | Check that your credentials are correct |
+    | 403 response | Confirm your API key includes the `accounts` scope |
+
+    </details>
+
+
+    <details>
+    <summary><strong>View Quickstart (Postman)</strong></summary>
+
+     [Open the collection in Postman](https://www.postman.com/investec-open-api/workspace/programmable-banking/collection/26868804-00260d55-0009-42ee-b148-d439992e64ff?action=share&creator=26868804)  
+     [Run in Postman](https://god.gw.postman.com/run-collection/26868804-00260d55-0009-42ee-b148-d439992e64ff?action=collection%2Ffork&collection-url=entityId%3D26868804-00260d55-0009-42ee-b148-d439992e64ff%26entityType%3Dcollection%26workspaceId%3D905c2bab-81a1-4297-8b70-2456c776a7a0)
+
+     The instructions below will guide you through the process of authenticating and getting your accounts in Postman. Before you start, **fork** the appropriate collection, and work on the fork now available in My Workspace. 
+
+     **1. Authenticate** 
+
+     1. Head over to the **Variables** tab to set your environment variables 
+    2. Insert your client ID, client secret, and x-api key. 
+
+    3. Navigate to the Auth folder, and the POST Authentication query (URL: https://openapi.investec.com/identity/v2/oauth2/token). 
+
+    - Under **Authorization**: The Auth type is set to Basic Auth 
+    - Under **Headers**: Your headers include the x-api-key header which uses the key you just filled in. 
+    - Under **Body**: In the request body, the grant-type field has the value client_credentials 
+     4. Hit send on the request.  
+
+     In response to your client id, secret and x-api-key, the endpoint will respond with a secure token, called a bearer token, and the period for which the token is valid (30 minutes).
+
+     Navigate back to the Variables table and **paste your token into the token field**. 
+
+     **2. Get your accounts**
+
+    1. Navigate to the Accounts folder and the GET Accounts query
+    2. Hit Send to make a call to the Account Information API endpoint (no additional parameters need to be set).
+
+     The JSON response will include all your accounts, and each account has a unique ID (accountId) that you will use when transacting against it.
+
+    </details>
+
+
+     # Sandbox
+
+    <details>
+    <summary><strong>Sandbox access</strong></summary>
+
+     **Base API URL**: https://openapisandbox.investec.com 
+    - To authenticate in the Sandbox environment, you are provided with a **client_id**, **client_secret**, and **x-api-key**.  
+    - The client_id and client_secret are combined and **Base64 encoded** to create the value used in the Authorization header as Basic {base64_value} — this encoded value is provided below for you. 
+    - The x-api-key is sent as a separate header, and the request will return an **access_token**. 
+    - The sandbox has the following scopes: 
+      - accounts - Account information
+      - balances - Account balance information 
+      -  transactions - Transaction history 
+      - transfers - Inter account transfer 
+      - beneficiarypayments - Beneficiary payments 
+      - documents - pdf statements and tax certificates.
+    - Follow the [Quickstart](#Quickstart(cURL)) instructions to get going using the Sandbox 
+
+     **Sandbox credentials**
+
+    | Field | Value |
+    |-------|--------|
+    | client_id | `yAxzQRFX97vOcyQAwluEU6H6ePxMA5eY` |
+    | client_secret | `4dY0PjEYqoBrZ99r` |
+    | x-api-key | `eUF4elFSRlg5N3ZPY3lRQXdsdUVVNkg2ZVB4TUE1ZVk6YVc1MlpYTjBaV010ZW1FdGNHSXRZV05qYjNWdWRITXRjMkZ1WkdKdmVBPT0=`|
+    | Authorization | Basic `eUF4elFSRlg5N3ZPY3lRQXdsdUVVNkg2ZVB4TUE1ZVk6NGRZMFBqRVlxb0JyWjk5cg==`|
+     # Release notes 
+
+
+
+    <details>
+    <summary><strong>Description of API changes</strong></summary> 
+
+     2026-05-06
+    - **Deprecation**: Removed the Transfer Multiple V1 endpoint from the documentation.
+
+     2024-11-07
+    - **Enhancement**: Added an additional pending transactions endpoint `/za/pb/v1/accounts/{accountId}/pending-transactions` 
+    - **Enhancement**: Added support for `?includePending=true`
+    - **Enhancement**: Added a uuid property to the transactions endpoint
+    - **Enhancement**: Added approved beneficiaries with `"beneficiaryType": "INVESTECAPPROVED"`
+
+     2023-09-07
+    - **Enhancement**: Added payment initiation requiring authorisation
+
+     2023-08-24
+    - **Enhancement**: Added document retrieval
+    - **Enhancement**: Added more balances to the Balance endpoint
+
+     2023-05-29
+    - **Enhancement**: Updated response codes returned
+
+     2023-03-05
+    - **Enhancement**: Added a sandbox environment
+
+     2022-11-25
+    - **Enhancement**: Included inter account transfers v2
+    - **Enhancement**: Included beneficiary payments
+    - **Enhancement**: Included beneficiaries
+    - **Enhancement**: Included beneficiary categories
+
+     2022-02-21
+    - **Enhancement**: Included inter account transfers
+
+     2021-10-01
+    - **Fix**: Running balance displays correctly for negative values
+
+     2020-11-13
+    - **Enhancement**: Added transaction type filter
+
+     2020-11-10
+    - **Enhancement**: Added postedOrder and transactionType
+
+     2020-09-08
+    - **Fix**: Implemented CORS and multi User-Agent support
+
+     2020-07-21
+    - **Enhancement**: Added transactionDate and date range filtering 
+
+
+    </details>
+  termsOfService: https://developer.investec.com/za/terms-of-use
+  contact:
+    name: Investec Developer Support
+    email: developer@investec.com
+tags:
+  - name: Account information
+    description: Get account-related data, including current balances, transaction
+      history, pending transactions, and associated beneficiaries.
+  - name: Inter account transfers
+    description: Transfer funds to one or multiple accounts.
+  - name: Beneficiaries and Beneficiary payments
+    description: Make a payment to one or more beneficiaries. This includes payments
+      requiring authorisation.
+  - name: Documents
+    description: Get a list of documents and retrieve specified documents.
+paths:
+  /za/pb/v1/accounts:
+    get:
+      summary: Get Accounts
+      description: Get a list of accounts along with associated metadata, including
+        account name, account type, and linked Investec Online Banking profiles.
+      operationId: accounts
+      tags:
+        - Account information
+      security:
+        - OAuth2:
+            - accounts
+        - OAuth2Sandbox:
+            - accounts
+      x-codeSamples:
+        - lang: Curl
+          label: cURL
+          source: "curl --location
+            'https://openapisandbox.investec.com/za/pb/v1/accounts'  --header
+            'Authorization: Bearer {yourBearerToken}'"
+        - lang: HTTP
+          label: HTTP
+          source: |-
+            GET /za/pb/v1/accounts HTTP/1.1 
+            Host: openapisandbox.investec.com 
+            Authorization: Bearer {yourBearerToken}
+      responses:
+        "200":
+          description: The requested operation was successfully completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAccounts"
+              example:
+                data:
+                  accounts:
+                    - accountId: "3353431574710163189587446"
+                      accountNumber: "10101010101"
+                      accountName: Mr John Doe
+                      referenceName: My Investec Private Bank Account
+                      productName: Private Bank Account
+                      kycCompliant: true
+                      profileId: "10163189587443"
+                      profileName: My Profile
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/accounts
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/accounts/{accountId}/balance:
+    get:
+      summary: Get Account Balance
+      description: Get the balance for a specified account.
+      operationId: balance
+      tags:
+        - Account information
+      security:
+        - OAuth2:
+            - balances
+        - OAuth2Sandbox:
+            - balances
+      x-codeSamples:
+        - lang: Curl
+          label: cURL
+          source: "curl --location
+            'https://openapisandbox.investec.com/za/pb/v1/accounts/{accountId}/\
+            balance'  --header 'Authorization: Bearer {yourBearerToken}'"
+        - lang: HTTP
+          label: HTTP
+          source: |-
+            GET /za/pb/v1/accounts/{accountId}/balance HTTP/1.1 
+             Host: openapisandbox.investec.com 
+            Authorization: Bearer {yourBearerToken}
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 30
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAccountBalance"
+              example:
+                data:
+                  accountId: "172878438321553632224"
+                  currentBalance: 28857.76
+                  availableBalance: 98857.76
+                  budgetBalance: 0
+                  straightBalance: 0
+                  cashBalance: -10818415.98
+                  currency: ZAR
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/accounts/{accountId}/balance
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/accounts/{accountId}/transactions:
+    get:
+      summary: Get Account Transactions
+      description: Get the transactions for a specified account.
+      tags:
+        - Account information
+      operationId: accountsTransactions
+      security:
+        - OAuth2:
+            - transactions
+        - OAuth2Sandbox:
+            - transactions
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 30
+        - name: fromDate
+          description: Refers to the date range filter's start date. Will default to
+            today's date, minus 180 days, if not specified.
+          in: query
+          required: false
+          style: form
+          schema:
+            type: string
+            example: 2021-05-01
+        - name: toDate
+          description: Refers to the date range filter's end date. Will default to today's
+            date if not specified.
+          in: query
+          required: false
+          style: form
+          schema:
+            type: string
+            example: 2021-06-01
+        - name: transactionType
+          description: Refers to the transaction type filter's value.
+          in: query
+          required: false
+          style: form
+          schema:
+            type: string
+            example: FeesAndInterest
+        - in: query
+          name: includePending
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTransactions"
+              example:
+                data:
+                  transactions:
+                    - accountId: "172878438321553632224"
+                      type: DEBIT
+                      transactionType: FeesAndInterest
+                      status: POSTED
+                      description: MONTHLY SERVICE CHARGE
+                      cardNumber: ""
+                      postedOrder: 13379
+                      postingDate: 2020-06-11
+                      valueDate: 2020-06-10
+                      actionDate: 2020-11-10
+                      transactionDate: 2020-06-10
+                      amount: 535
+                      runningBalance: 28857.76
+                      uuid: "32224202006110013379"
+                    - accountId: "172878438321553632224"
+                      type: CREDIT
+                      transactionType: FeesAndInterest
+                      status: POSTED
+                      description: CREDIT INTEREST
+                      cardNumber: ""
+                      postedOrder: 13378
+                      postingDate: 2020-06-11
+                      valueDate: 2020-06-10
+                      actionDate: 2020-11-10
+                      transactionDate: 2020-06-10
+                      amount: 31.09
+                      runningBalance: 29392.76
+                      uuid: "32224202006110013378"
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/accounts/{accountId}/transactions?fromDate={fromDate}&toDate={toDate}&transactionType={transactionType}
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/accounts/{accountId}/pending-transactions:
+    get:
+      summary: Get Account Pending Transactions
+      description: Get the pending transactions for a specified account.
+      tags:
+        - Account information
+      operationId: accountsPendingTransactions
+      security:
+        - OAuth2:
+            - transactions
+        - OAuth2Sandbox:
+            - transactions
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 30
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPendingTransactions"
+              example:
+                data:
+                  transactions:
+                    - accountId: "172878438321553632224"
+                      type: DEBIT
+                      status: PENDING
+                      description: MONTHLY SERVICE CHARGE
+                      transactionDate: 2020-06-10
+                      amount: 535
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/accounts/{accountId}/pending-transactions
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/accounts/{accountId}/transfermultiple:
+    post:
+      summary: Transfer Multiple
+      description: Transfer funds to one or multiple accounts.
+      tags:
+        - Inter account transfers
+      operationId: transferv2
+      security:
+        - OAuth2:
+            - transfers
+        - OAuth2Sandbox:
+            - transfers
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+          example: application/json
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                transferList:
+                  type: array
+                  items:
+                    required:
+                      - beneficiaryAccountId
+                      - amount
+                      - myReference
+                      - theirReference
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      beneficiaryAccountId:
+                        type: string
+                      amount:
+                        type: string
+                      myReference:
+                        type: string
+                      theirReference:
+                        type: string
+                profileId:
+                  type: string
+            example:
+              transferList:
+                - beneficiaryAccountId: XXXXXXXXXX
+                  amount: "10.12"
+                  myReference: Trans from PBA to PS
+                  theirReference: Trans from PBA to PS
+              profileId: "10163189587443"
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer2"
+              example:
+                data:
+                  TransferResponses:
+                    - PaymentReferenceNumber: UBP0012345678
+                      PaymentDate: 06/04/2022
+                      Status: "- No authorisation necessary <BR>- Payment/Transfer effective date
+                        06/04/2022"
+                      BeneficiaryName: API transfer
+                      BeneficiaryAccountId: XXXXXXXXXX
+                      AuthorisationRequired: false
+                  ErrorMessage: null
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/accounts/172878438321553632224/transfermultiple
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/accounts/{accountId}/paymultiple:
+    post:
+      summary: Pay Multiple
+      description: |-
+        Make a payment to one or more beneficiaries. 
+
+        - Size limit of 50 payments per request.
+      tags:
+        - Beneficiaries and Beneficiary payments
+      operationId: payBeneficiary
+      security:
+        - OAuth2:
+            - beneficiarypayments
+        - OAuth2Sandbox:
+            - beneficiarypayments
+      parameters:
+        - in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+          example: application/json
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          example: "3353431574710163189587446"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                paymentList:
+                  type: array
+                  items:
+                    required:
+                      - beneficiaryId
+                      - amount
+                      - myReference
+                      - theirReference
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      beneficiaryId:
+                        type: string
+                      amount:
+                        type: string
+                      myReference:
+                        type: string
+                      theirReference:
+                        type: string
+                      authoriserAId:
+                        description: If the payment requires authorisation this is derived from
+                          profiles/{profileId}/accounts/{accountId}/authorisationsetupdetails.
+                        type: string
+                      authoriserBId:
+                        description: If the payment requires authorisation this is derived from
+                          profiles/{profileId}/accounts/{accountId}/authorisationsetupdetails.
+                        type: string
+                      authPeriodId:
+                        description: If the payment requires authorisation this is derived from
+                          profiles/{profileId}/accounts/{accountId}/authorisationsetupdetails.
+                        type: string
+                      fasterPayment:
+                        description: If the payment requires authorisation this can be set to true if
+                          the beneficiary allows it from
+                          profiles/{profileId}/beneficiaries/{accountId}.
+                        type: boolean
+            example:
+              paymentList:
+                - beneficiaryId: MTAxMDEwMTAxMDEwMTA=
+                  amount: "101"
+                  myReference: Beneficiary payment to
+                  theirReference: Payment from Sandbox
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+              example:
+                data:
+                  TransferResponses:
+                    - PaymentReferenceNumber: UBP0012345678
+                      PaymentDate: 06/04/2022
+                      Status: "- No authorisation necessary <BR>- Payment/Transfer effective date
+                        06/04/2022"
+                      BeneficiaryName: API transfer
+                      BeneficiaryAccountId: XXXXXXXXXX
+                      AuthorisationRequired: false
+                  ErrorMessage: null
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/accounts/{accountId}/paymultiple
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/accounts/beneficiaries:
+    get:
+      summary: Get Beneficiaries
+      description: Get a list of beneficiaries linked to a specified Investec Online
+        Banking profile
+      tags:
+        - Beneficiaries and Beneficiary payments
+      operationId: beneficiaries
+      security:
+        - OAuth2:
+            - beneficiarypayments
+        - OAuth2Sandbox:
+            - beneficiarypayments
+      parameters: []
+      x-codeSamples:
+        - lang: Curl
+          label: cURL
+          source: "curl --location
+            'https://openapisandbox.investec.com/za/pb/v1/accounts/beneficiarie\
+            s'  --header 'Authorization: Bearer {yourBearerToken}'"
+        - lang: HTTP
+          label: HTTP
+          source: |-
+            GET /za/pb/v1/accounts/beneficiaries HTTP/1.1 
+            Host: openapisandbox.investec.com 
+            Authorization: Bearer {yourBearerToken}
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetBeneficiaries"
+              example:
+                data:
+                  - beneficiaryId: MTAxOTAxOTyNTQMTU=
+                    accountNumber: "6241708900"
+                    code: "250655"
+                    bank: FIRST NATIONAL BANK
+                    beneficiaryName: Ad A AIA
+                    lastPaymentAmount: "10.00"
+                    lastPaymentDate: 10/03/2019
+                    cellNo: "0987654321"
+                    emailAddress: QUwCV@someweb.co.za
+                    name: DccIcIXI
+                    referenceAccountNumber: NIC036
+                    referenceName: amingFra ing Framin
+                    categoryId: "10164601247279"
+                    profileId: "10163189587443"
+                    fasterPaymentAllowed: true
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/accounts/beneficiaries
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/accounts/beneficiarycategories:
+    get:
+      summary: Get Beneficiary Categories
+      description: List all the beneficiary categories available.
+      operationId: beneficiaryCategories
+      tags:
+        - Beneficiaries and Beneficiary payments
+      security:
+        - OAuth2:
+            - beneficiarypayments
+        - OAuth2Sandbox:
+            - beneficiarypayments
+      parameters: []
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Beneficiarycategories"
+              example:
+                data:
+                  id: "10164601247279"
+                  isDefault: "true"
+                  name: Not Categorised
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/accounts/beneficiarycategories
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/profiles:
+    get:
+      summary: Get Profiles
+      description: Get a list of all the Investec Online Banking profiles for which
+        you have consent.
+      operationId: profiles
+      tags:
+        - Account information
+      security:
+        - OAuth2:
+            - accounts
+        - OAuth2Sandbox:
+            - accounts
+      parameters: []
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetProfiles"
+              example:
+                data:
+                  - profileId: "10163189587444"
+                    profileName: Profile A
+                    defaultProfile: true
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/profiles
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/profiles/{profileId}/accounts:
+    get:
+      summary: Get Profile Accounts
+      description: Get all the accounts for a specified Investec Online Banking profile.
+      operationId: profileaccounts
+      tags:
+        - Account information
+      security:
+        - OAuth2:
+            - accounts
+        - OAuth2Sandbox:
+            - accounts
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+          example: "10190798011073"
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetProfileAccounts"
+              example:
+                data:
+                  - accountId: "172878438321553632224"
+                    accountNumber: "10010206147"
+                    accountName: Mr John Doe
+                    referenceName: My Investec Private Bank Account
+                    productName: Private Bank Account
+                    kycCompliant: true
+                    profileId: "10163189587443"
+                    profileName: My Profile
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/profiles/{profileId}/accounts
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/profiles/{profileId}/accounts/{accountId}/authorisationsetupdetails:
+    get:
+      summary: Get Authorisation Setup Details
+      description: >-
+        Get the authorisation setup details for a specified Investec Online
+        Banking profile and account. This includes the number of authorisers,
+        name of the authorisers, and the allowable authorisation time period.
+
+         This is typically used by Private Business users when making payments.
+      operationId: authorisationsetupdetails
+      tags:
+        - Account information
+      security:
+        - OAuth2:
+            - accounts
+        - OAuth2Sandbox:
+            - accounts
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+          example: "4643233712010169349094403"
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          example: "10190798011073"
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAuthsetup"
+              example:
+                data:
+                  numberOfAuthorisationRequired: "2"
+                  period:
+                    - id: "1"
+                      description: 1 Working day
+                    - id: "2"
+                      description: 2 Working days
+                    - id: "3"
+                      description: 3 Working days
+                    - id: "4"
+                      description: 4 Working days
+                    - id: "5"
+                      description: 5 Working days
+                    - id: "6"
+                      description: 6 Working days
+                    - id: "7"
+                      description: 7 Working days
+                    - id: "8"
+                      description: 8 Working days
+                    - id: "9"
+                      description: 9 Working days
+                    - id: "10"
+                      description: 10 Working days
+                    - id: "0"
+                      description: Current Day
+                  authorisersListA:
+                    - authoriserId: hnNhB6qb5H6SvJC1ZPK2qQ==
+                      name: Mr Auth 1
+                    - authoriserId: ijxHLoVHqCyF86dGG4rZww==
+                      name: Mr Auth 2
+                    - authoriserId: TAd6rGuhOeNRiujN0nlKxQ==
+                      name: All
+                  authorisersListB:
+                    - authoriserId: hnNhB6qb5H6SvJC1ZPK2qQ==
+                      name: Mr Auth 3
+                    - authoriserId: ijxHLoVHqCyF86dGG4rZww==
+                      name: Mr Auth 4
+                    - authoriserId: TAd6rGuhOeNRiujN0nlKxQ==
+                      name: All
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/profiles/{profileId}/accounts/{accountId}/authorisationsetupdetails
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/profiles/{profileId}/accounts/{accountId}/beneficiaries:
+    get:
+      summary: Get Profile Beneficiaries
+      description: Get all the beneficiaries available for a specified Investec Online
+        Banking profile and account.
+      operationId: profilebeneficiaries
+      tags:
+        - Account information
+      security:
+        - OAuth2:
+            - accounts
+        - OAuth2Sandbox:
+            - accounts
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+          example: "4643233712010169349094403"
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          example: "10190798011073"
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetBeneficiaries"
+              example:
+                data:
+                  - beneficiaryId: MTAxOTAxOTyNTQMTU=
+                    accountNumber: "6241708900"
+                    code: "250655"
+                    bank: FIRST NATIONAL BANK
+                    beneficiaryName: Ad A AIA
+                    lastPaymentAmount: "10.00"
+                    lastPaymentDate: 10/03/2019
+                    cellNo: "0987654321"
+                    emailAddress: QUwCV@someweb.co.za
+                    name: DccIcIXI
+                    referenceAccountNumber: NIC036
+                    referenceName: amingFra ing Framin
+                    categoryId: "10164601247279"
+                    profileId: "10163189587443"
+                    fasterPaymentAllowed: true
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/profiles/{profileId}/accounts/{accountId}/beneficiaries
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/accounts/{accountId}/documents:
+    get:
+      summary: Get Documents
+      description: Get a list of all the documents available for a specified account.
+      operationId: documents
+      tags:
+        - Documents
+      security:
+        - OAuth2:
+            - documents.statements
+            - documents.taxcertificates
+        - OAuth2Sandbox:
+            - documents.statements
+            - documents.taxcertificates
+      parameters:
+        - in: path
+          name: accountId
+          description: A unique and immutable identifier used to identify the account
+            resource. This identifier has no meaning to the account owner.
+          required: true
+          schema:
+            type: string
+        - name: fromDate
+          description: Refers to the date range filter's start date.
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+            example: 2023-04-01
+        - name: toDate
+          description: Refers to the date range filter's end date.
+          in: query
+          required: true
+          style: form
+          schema:
+            type: string
+            example: 2023-06-01
+      responses:
+        "200":
+          description: Resource has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetDocuments"
+              example:
+                data:
+                  - documentType: Statement
+                    documentDate: 2023-03-16
+                  - documentType: Statement
+                    documentDate: 2023-02-16
+                links:
+                  self: https://openapi.investec.com/za/pb/v1/accounts/{accountId}/documents?fromDate={fromDate}&toDate={toDate}
+                meta:
+                  totalPages: 1
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+  /za/pb/v1/accounts/{accountId}/document/{documentType}/{documentDate}:
+    get:
+      summary: Get Document
+      description: Retrieve the document specified.
+      operationId: document
+      tags:
+        - Documents
+      security:
+        - OAuth2:
+            - documents.statements
+            - documents.taxcertificates
+        - OAuth2Sandbox:
+            - documents.statements
+            - documents.taxcertificates
+      parameters:
+        - in: path
+          name: accountId
+          description: A unique and immutable identifier used to identify the account
+            resource. This identifier has no meaning to the account owner.
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: documentType
+          description: Document Type
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: documentDate
+          description: Document Date
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: PDF document retrieved successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad Request - The requested operation will not be carried out
+        "401":
+          description: Unauthorized - The requested operation was refused access
+        "403":
+          description: Forbidden - Not permitted to make this request
+        "429":
+          description: Too Many Requests - To many requests in quick succession, Retry the
+            request.
+        "500":
+          description: Internal Server Error - The requested operation failed to execute
+components:
+  securitySchemes: {}
+  parameters:
+    fromDate:
+      name: fromDate
+      description: Refers to the date range filter's start date. Will default to
+        today's date, minus 180 days, if not specified.
+      in: query
+      required: false
+      style: form
+      schema:
+        type: string
+        example: 2021-05-01
+    toDate:
+      name: toDate
+      description: Refers to the date range filter's end date. Will default to today's
+        date if not specified.
+      in: query
+      required: false
+      style: form
+      schema:
+        type: string
+        example: 2021-06-01
+    transactionType:
+      name: transactionType
+      description: Refers to the transaction type filter's value.
+      in: query
+      required: false
+      style: form
+      schema:
+        type: string
+        example: FeesAndInterest
+  schemas:
+    MetaData:
+      description: Meta Data relevant to the payload
+      type: object
+      additionalProperties: false
+      properties:
+        totalPages:
+          format: int32
+          type: integer
+    Links:
+      description: Links relevant to the payload
+      required:
+        - self
+      type: object
+      additionalProperties: false
+      properties:
+        self:
+          type: string
+    GetAccounts:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          properties:
+            accounts:
+              type: array
+              items:
+                required:
+                  - accountId
+                  - accountNumber
+                  - accountName
+                  - referenceName
+                  - productName
+                  - kycCompliant
+                  - profileId
+                  - profileName
+                type: object
+                additionalProperties: false
+                properties:
+                  accountId:
+                    description: A unique and immutable identifier used to identify the account
+                      resource. This identifier has no meaning to the account
+                      owner.
+                    maxLength: 40
+                    minLength: 1
+                    type: string
+                  accountNumber:
+                    description: A unique and immutable identifier used to identify the account
+                      resource. This identifier is what is commonly known to the
+                      owner.
+                    maxLength: 40
+                    minLength: 1
+                    type: string
+                  accountName:
+                    description: The nickname of the account, a means of identification of the
+                      account.
+                    maxLength: 70
+                    minLength: 1
+                    type: string
+                  referenceName:
+                    description: The nickname of the account, assigned by the account owner in order
+                      to provide an additional means of identification of the
+                      account.
+                    maxLength: 70
+                    minLength: 1
+                    type: string
+                  productName:
+                    description: Identifies the product of the account.
+                    maxLength: 70
+                    minLength: 1
+                    type: string
+                  kycCompliant:
+                    description: Identifies if the account is KYC compliant.
+                    type: boolean
+                  profileId:
+                    description: A unique and immutable identifier used to identify the account
+                      profile. This identifier has no meaning to the account
+                      owner. This is used to filter the beneficiary list
+                    maxLength: 70
+                    minLength: 1
+                    type: string
+                  profileName:
+                    description: The nickname of the profile, assigned by the account owner in order
+                      to provide an additional means of identification of the
+                      profile.
+                    maxLength: 70
+                    minLength: 1
+                    type: string
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+    GetProfileAccounts:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          items:
+            required:
+              - accountId
+              - accountNumber
+              - accountName
+              - referenceName
+              - productName
+              - kycCompliant
+              - profileId
+              - profileName
+            type: object
+            additionalProperties: false
+            properties:
+              accountId:
+                description: A unique and immutable identifier used to identify the account
+                  resource. This identifier has no meaning to the account owner.
+                maxLength: 40
+                minLength: 1
+                type: string
+              accountNumber:
+                description: A unique and immutable identifier used to identify the account
+                  resource. This identifier is what is commonly known to the
+                  owner.
+                maxLength: 40
+                minLength: 1
+                type: string
+              accountName:
+                description: The nickname of the account, a means of identification of the
+                  account.
+                maxLength: 70
+                minLength: 1
+                type: string
+              referenceName:
+                description: The nickname of the account, assigned by the account owner in order
+                  to provide an additional means of identification of the
+                  account.
+                maxLength: 70
+                minLength: 1
+                type: string
+              productName:
+                description: Identifies the product of the account.
+                maxLength: 70
+                minLength: 1
+                type: string
+              kycCompliant:
+                description: Identifies if the account is KYC compliant.
+                type: boolean
+              profileId:
+                description: A unique and immutable identifier used to identify the account
+                  profile. This identifier has no meaning to the account owner.
+                  This is used to filter the beneficiary list
+                maxLength: 70
+                minLength: 1
+                type: string
+              profileName:
+                description: The nickname of the profile, assigned by the account owner in order
+                  to provide an additional means of identification of the
+                  profile.
+                maxLength: 70
+                minLength: 1
+                type: string
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+    Accounts:
+      type: object
+      additionalProperties: false
+      properties:
+        accounts:
+          type: array
+          items:
+            required:
+              - accountId
+              - accountNumber
+              - accountName
+              - referenceName
+              - productName
+              - kycCompliant
+              - profileId
+              - profileName
+            type: object
+            additionalProperties: false
+            properties:
+              accountId:
+                description: A unique and immutable identifier used to identify the account
+                  resource. This identifier has no meaning to the account owner.
+                maxLength: 40
+                minLength: 1
+                type: string
+              accountNumber:
+                description: A unique and immutable identifier used to identify the account
+                  resource. This identifier is what is commonly known to the
+                  owner.
+                maxLength: 40
+                minLength: 1
+                type: string
+              accountName:
+                description: The nickname of the account, a means of identification of the
+                  account.
+                maxLength: 70
+                minLength: 1
+                type: string
+              referenceName:
+                description: The nickname of the account, assigned by the account owner in order
+                  to provide an additional means of identification of the
+                  account.
+                maxLength: 70
+                minLength: 1
+                type: string
+              productName:
+                description: Identifies the product of the account.
+                maxLength: 70
+                minLength: 1
+                type: string
+              kycCompliant:
+                description: Identifies if the account is KYC compliant.
+                type: boolean
+              profileId:
+                description: A unique and immutable identifier used to identify the account
+                  profile. This identifier has no meaning to the account owner.
+                  This is used to filter the beneficiary list
+                maxLength: 70
+                minLength: 1
+                type: string
+              profileName:
+                description: The nickname of the profile, assigned by the account owner in order
+                  to provide an additional means of identification of the
+                  profile.
+                maxLength: 70
+                minLength: 1
+                type: string
+    ProfileAccounts:
+      type: array
+      items:
+        required:
+          - accountId
+          - accountNumber
+          - accountName
+          - referenceName
+          - productName
+          - kycCompliant
+          - profileId
+          - profileName
+        type: object
+        additionalProperties: false
+        properties:
+          accountId:
+            description: A unique and immutable identifier used to identify the account
+              resource. This identifier has no meaning to the account owner.
+            maxLength: 40
+            minLength: 1
+            type: string
+          accountNumber:
+            description: A unique and immutable identifier used to identify the account
+              resource. This identifier is what is commonly known to the owner.
+            maxLength: 40
+            minLength: 1
+            type: string
+          accountName:
+            description: The nickname of the account, a means of identification of the
+              account.
+            maxLength: 70
+            minLength: 1
+            type: string
+          referenceName:
+            description: The nickname of the account, assigned by the account owner in order
+              to provide an additional means of identification of the account.
+            maxLength: 70
+            minLength: 1
+            type: string
+          productName:
+            description: Identifies the product of the account.
+            maxLength: 70
+            minLength: 1
+            type: string
+          kycCompliant:
+            description: Identifies if the account is KYC compliant.
+            type: boolean
+          profileId:
+            description: A unique and immutable identifier used to identify the account
+              profile. This identifier has no meaning to the account owner. This
+              is used to filter the beneficiary list
+            maxLength: 70
+            minLength: 1
+            type: string
+          profileName:
+            description: The nickname of the profile, assigned by the account owner in order
+              to provide an additional means of identification of the profile.
+            maxLength: 70
+            minLength: 1
+            type: string
+    Account:
+      required:
+        - accountId
+        - accountNumber
+        - accountName
+        - referenceName
+        - productName
+        - kycCompliant
+        - profileId
+        - profileName
+      type: object
+      additionalProperties: false
+      properties:
+        accountId:
+          description: A unique and immutable identifier used to identify the account
+            resource. This identifier has no meaning to the account owner.
+          maxLength: 40
+          minLength: 1
+          type: string
+        accountNumber:
+          description: A unique and immutable identifier used to identify the account
+            resource. This identifier is what is commonly known to the owner.
+          maxLength: 40
+          minLength: 1
+          type: string
+        accountName:
+          description: The nickname of the account, a means of identification of the
+            account.
+          maxLength: 70
+          minLength: 1
+          type: string
+        referenceName:
+          description: The nickname of the account, assigned by the account owner in order
+            to provide an additional means of identification of the account.
+          maxLength: 70
+          minLength: 1
+          type: string
+        productName:
+          description: Identifies the product of the account.
+          maxLength: 70
+          minLength: 1
+          type: string
+        kycCompliant:
+          description: Identifies if the account is KYC compliant.
+          type: boolean
+        profileId:
+          description: A unique and immutable identifier used to identify the account
+            profile. This identifier has no meaning to the account owner. This
+            is used to filter the beneficiary list
+          maxLength: 70
+          minLength: 1
+          type: string
+        profileName:
+          description: The nickname of the profile, assigned by the account owner in order
+            to provide an additional means of identification of the profile.
+          maxLength: 70
+          minLength: 1
+          type: string
+    GetAccountBalance:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          description: Set of elements used to define the balance details.
+          required:
+            - accountId
+            - currentBalance
+            - availableBalance
+            - budgetBalance
+            - straightBalance
+            - cashBalance
+            - currency
+          additionalProperties: false
+          properties:
+            accountId:
+              description: A unique and immutable identifier used to identify the account
+                resource. This identifier has no meaning to the account owner.
+              maxLength: 40
+              minLength: 1
+              type: string
+            currentBalance:
+              description: A number of monetary units specified in an active currency where
+                the unit of currency is explicit and compliant with ISO 4217.
+              format: double
+              type: number
+            availableBalance:
+              description: A number of monetary units specified in an active currency where
+                the unit of currency is explicit and compliant with ISO 4217.
+              format: double
+              type: number
+            budgetBalance:
+              description: A number of monetary units specified in an active currency where
+                the unit of currency is explicit and compliant with ISO 4217.
+              format: double
+              type: number
+            straightBalance:
+              description: A number of monetary units specified in an active currency where
+                the unit of currency is explicit and compliant with ISO 4217.
+              format: double
+              type: number
+            cashBalance:
+              description: A number of monetary units specified in an active currency where
+                the unit of currency is explicit and compliant with ISO 4217.
+              format: double
+              type: number
+            currency:
+              description: A code allocated to a currency by a Maintenance Agency under an
+                international identification scheme, as described in the latest
+                edition of the international standard ISO 4217 "Codes for the
+                representation of currencies and funds".
+              pattern: ^[A-Z]{3,3}$
+              type: string
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+    AccountBalance:
+      type: object
+      description: Set of elements used to define the balance details.
+      required:
+        - accountId
+        - currentBalance
+        - availableBalance
+        - budgetBalance
+        - straightBalance
+        - cashBalance
+        - currency
+      additionalProperties: false
+      properties:
+        accountId:
+          description: A unique and immutable identifier used to identify the account
+            resource. This identifier has no meaning to the account owner.
+          maxLength: 40
+          minLength: 1
+          type: string
+        currentBalance:
+          description: A number of monetary units specified in an active currency where
+            the unit of currency is explicit and compliant with ISO 4217.
+          format: double
+          type: number
+        availableBalance:
+          description: A number of monetary units specified in an active currency where
+            the unit of currency is explicit and compliant with ISO 4217.
+          format: double
+          type: number
+        budgetBalance:
+          description: A number of monetary units specified in an active currency where
+            the unit of currency is explicit and compliant with ISO 4217.
+          format: double
+          type: number
+        straightBalance:
+          description: A number of monetary units specified in an active currency where
+            the unit of currency is explicit and compliant with ISO 4217.
+          format: double
+          type: number
+        cashBalance:
+          description: A number of monetary units specified in an active currency where
+            the unit of currency is explicit and compliant with ISO 4217.
+          format: double
+          type: number
+        currency:
+          description: A code allocated to a currency by a Maintenance Agency under an
+            international identification scheme, as described in the latest
+            edition of the international standard ISO 4217 "Codes for the
+            representation of currencies and funds".
+          pattern: ^[A-Z]{3,3}$
+          type: string
+    GetTransactions:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          properties:
+            transactions:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  accountId:
+                    description: A unique and immutable identifier used to identify the account
+                      resource. This identifier has no meaning to the account
+                      owner.
+                    maxLength: 40
+                    minLength: 1
+                    type: string
+                  type:
+                    enum:
+                      - CREDIT
+                      - DEBIT
+                    type: string
+                  transactionType:
+                    description: Refers to the transaction type filter's value.
+                    maxLength: 40
+                    minLength: 1
+                    type: string
+                  status:
+                    enum:
+                      - POSTED
+                      - PENDING
+                    type: string
+                  description:
+                    description: Unique identifier for the transaction within an servicing
+                      institution. This identifier is both unique and immutable.
+                    maxLength: 40
+                    minLength: 1
+                    type: string
+                  cardNumber:
+                    description: Unique identifier for the transaction within an servicing
+                      institution. This identifier is both unique and immutable.
+                    maxLength: 40
+                    minLength: 0
+                    type: string
+                  postedOrder:
+                    description: Unique identifier for the transaction within an servicing
+                      institution. This identifier is both unique and immutable.
+                    type: number
+                  postingDate:
+                    format: date
+                    description: "Date when a transaction entry is posted to an account on the
+                      account servicer's books.\r
+
+                      Usage: Booking date is the expected booking date, unless
+                      the status is booked, in which case it is the actual
+                      booking date."
+                    type: string
+                  valueDate:
+                    format: date
+                    description: "Date at which assets become available to the account owner in case
+                      of a credit entry, or ceases to be available to the
+                      account owner in case of a debit transaction entry.\r
+
+                      \ Usage: If transaction entry status is pending and value
+                      date is present, then the value date refers to an
+                      expected/requested value date.\r
+
+                      For transaction entries subject to availability/float and
+                      for which availability information is provided, the value
+                      date must not be used. In this case the availability
+                      component identifies the number of availability days"
+                    type: string
+                  actionDate:
+                    format: date
+                    description: "Date at which assets become available to the account owner in case
+                      of a credit entry, or cease to be available to the account
+                      owner in case of a debit transaction entry.\r
+
+                      Usage: If transaction entry status is pending and value
+                      date is present, then the value date refers to an
+                      expected/requested value date.\r
+
+                      For transaction entries subject to availability/float and
+                      for which availability information is provided, the value
+                      date must not be used. In this case the availability
+                      component identifies the number of availability days."
+                    type: string
+                  transactionDate:
+                    format: date
+                    description: "Date at which assets become available to the account owner in case
+                      of a credit entry, or cease to be available to the account
+                      owner in case of a debit transaction entry.\r
+
+                      Usage: If transaction entry status is pending and value
+                      date is present, then the value date refers to an
+                      expected/requested value date.\r
+
+                      For transaction entries subject to availability/float and
+                      for which availability information is provided, the value
+                      date must not be used. In this case the availability
+                      component identifies the number of availability days."
+                    type: string
+                  amount:
+                    description: A number of monetary units specified in an active currency where
+                      the unit of currency is explicit and compliant with ISO
+                      4217.
+                    type: number
+                    format: double
+                    multipleOf: 0.01
+                    maximum: 9999999999999.99
+                  runningBalance:
+                    description: A number of monetary units specified in an active currency where
+                      the unit of currency is explicit and compliant with ISO
+                      4217.
+                    type: number
+                    format: double
+                    multipleOf: 0.01
+                    maximum: 9999999999999.99
+                  uuid:
+                    description: Unique identifier for the transaction entry.
+                    type: string
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+    Transactions:
+      type: object
+      additionalProperties: false
+      properties:
+        transactions:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              accountId:
+                description: A unique and immutable identifier used to identify the account
+                  resource. This identifier has no meaning to the account owner.
+                maxLength: 40
+                minLength: 1
+                type: string
+              type:
+                enum:
+                  - CREDIT
+                  - DEBIT
+                type: string
+              transactionType:
+                description: Refers to the transaction type filter's value.
+                maxLength: 40
+                minLength: 1
+                type: string
+              status:
+                enum:
+                  - POSTED
+                  - PENDING
+                type: string
+              description:
+                description: Unique identifier for the transaction within an servicing
+                  institution. This identifier is both unique and immutable.
+                maxLength: 40
+                minLength: 1
+                type: string
+              cardNumber:
+                description: Unique identifier for the transaction within an servicing
+                  institution. This identifier is both unique and immutable.
+                maxLength: 40
+                minLength: 0
+                type: string
+              postedOrder:
+                description: Unique identifier for the transaction within an servicing
+                  institution. This identifier is both unique and immutable.
+                type: number
+              postingDate:
+                format: date
+                description: "Date when a transaction entry is posted to an account on the
+                  account servicer's books.\r
+
+                  Usage: Booking date is the expected booking date, unless the
+                  status is booked, in which case it is the actual booking
+                  date."
+                type: string
+              valueDate:
+                format: date
+                description: "Date at which assets become available to the account owner in case
+                  of a credit entry, or cease to be available to the account
+                  owner in case of a debit transaction entry.\r
+
+                  Usage: If transaction entry status is pending and value date
+                  is present, then the value date refers to an
+                  expected/requested value date.\r
+
+                  For transaction entries subject to availability/float and for
+                  which availability information is provided, the value date
+                  must not be used. In this case the availability component
+                  identifies the number of availability days."
+                type: string
+              actionDate:
+                format: date
+                description: "Date at which assets become available to the account owner in case
+                  of a credit entry, or cease to be available to the account
+                  owner in case of a debit transaction entry.\r
+
+                  Usage: If transaction entry status is pending and value date
+                  is present, then the value date refers to an
+                  expected/requested value date.\r
+
+                  For transaction entries subject to availability/float and for
+                  which availability information is provided, the value date
+                  must not be used. In this case the availability component
+                  identifies the number of availability days."
+                type: string
+              transactionDate:
+                format: date
+                description: "Date at which assets become available to the account owner in case
+                  of a credit entry, or cease to be available to the account
+                  owner in case of a debit transaction entry.\r
+
+                  Usage: If transaction entry status is pending and value date
+                  is present, then the value date refers to an
+                  expected/requested value date.\r
+
+                  For transaction entries subject to availability/float and for
+                  which availability information is provided, the value date
+                  must not be used. In this case the availability component
+                  identifies the number of availability days."
+                type: string
+              amount:
+                description: A number of monetary units specified in an active currency where
+                  the unit of currency is explicit and compliant with ISO 4217.
+                type: number
+                format: double
+                multipleOf: 0.01
+                maximum: 9999999999999.99
+              runningBalance:
+                description: A number of monetary units specified in an active currency where
+                  the unit of currency is explicit and compliant with ISO 4217.
+                type: number
+                format: double
+                multipleOf: 0.01
+                maximum: 9999999999999.99
+              uuid:
+                description: Unique identifier for the transaction entry.
+                type: string
+    Transaction:
+      type: object
+      additionalProperties: false
+      properties:
+        accountId:
+          description: A unique and immutable identifier used to identify the account
+            resource. This identifier has no meaning to the account owner.
+          maxLength: 40
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - CREDIT
+            - DEBIT
+          type: string
+        transactionType:
+          description: Refers to the transaction type filter's value.
+          maxLength: 40
+          minLength: 1
+          type: string
+        status:
+          enum:
+            - POSTED
+            - PENDING
+          type: string
+        description:
+          description: Unique identifier for the transaction within an servicing
+            institution. This identifier is both unique and immutable.
+          maxLength: 40
+          minLength: 1
+          type: string
+        cardNumber:
+          description: Unique identifier for the transaction within an servicing
+            institution. This identifier is both unique and immutable.
+          maxLength: 40
+          minLength: 0
+          type: string
+        postedOrder:
+          description: Unique identifier for the transaction within an servicing
+            institution. This identifier is both unique and immutable.
+          type: number
+        postingDate:
+          format: date
+          description: "Date when a transaction entry is posted to an account on the
+            account servicer's books.\r
+
+            Usage: Booking date is the expected booking date, unless the status
+            is booked, in which case it is the actual booking date."
+          type: string
+        valueDate:
+          format: date
+          description: "Date at which assets become available to the account owner in case
+            of a credit entry, or cease to be available to the account owner in
+            case of a debit transaction entry.\r
+
+            Usage: If transaction entry status is pending and value date is
+            present, then the value date refers to an expected/requested value
+            date.\r
+
+            For transaction entries subject to availability/float and for which
+            availability information is provided, the value date must not be
+            used. In this case the availability component identifies the number
+            of availability days."
+          type: string
+        actionDate:
+          format: date
+          description: "Date at which assets become available to the account owner in case
+            of a credit entry, or cease to be available to the account owner in
+            case of a debit transaction entry.\r
+
+            Usage: If transaction entry status is pending and value date is
+            present, then the value date refers to an expected/requested value
+            date.\r
+
+            For transaction entries subject to availability/float and for which
+            availability information is provided, the value date must not be
+            used. In this case the availability component identifies the number
+            of availability days."
+          type: string
+        transactionDate:
+          format: date
+          description: "Date at which assets become available to the account owner in case
+            of a credit entry, or cease to be available to the account owner in
+            case of a debit transaction entry.\r
+
+            Usage: If transaction entry status is pending and value date is
+            present, then the value date refers to an expected/requested value
+            date.\r
+
+            For transaction entries subject to availability/float and for which
+            availability information is provided, the value date must not be
+            used. In this case the availability component identifies the number
+            of availability days."
+          type: string
+        amount:
+          description: A number of monetary units specified in an active currency where
+            the unit of currency is explicit and compliant with ISO 4217.
+          type: number
+          format: double
+          multipleOf: 0.01
+          maximum: 9999999999999.99
+        runningBalance:
+          description: A number of monetary units specified in an active currency where
+            the unit of currency is explicit and compliant with ISO 4217.
+          type: number
+          format: double
+          multipleOf: 0.01
+          maximum: 9999999999999.99
+        uuid:
+          description: Unique identifier for the transaction entry.
+          type: string
+    GetPendingTransactions:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          properties:
+            transactions:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  accountId:
+                    description: A unique and immutable identifier used to identify the account
+                      resource. This identifier has no meaning to the account
+                      owner.
+                    maxLength: 40
+                    minLength: 1
+                    type: string
+                  type:
+                    enum:
+                      - CREDIT
+                      - DEBIT
+                    type: string
+                  status:
+                    enum:
+                      - POSTED
+                      - PENDING
+                    type: string
+                  description:
+                    description: Unique identifier for the transaction within an servicing
+                      institution. This identifier is both unique and immutable.
+                    maxLength: 40
+                    minLength: 1
+                    type: string
+                  transactionDate:
+                    format: date
+                    description: "Date at which assets become available to the account owner in case
+                      of a credit entry, or cease to be available to the account
+                      owner in case of a debit transaction entry.\r
+
+                      Usage: If transaction entry status is pending and value
+                      date is present, then the value date refers to an
+                      expected/requested value date.\r
+
+                      For transaction entries subject to availability/float and
+                      for which availability information is provided, the value
+                      date must not be used. In this case the availability
+                      component identifies the number of availability days."
+                    type: string
+                  amount:
+                    description: A number of monetary units specified in an active currency where
+                      the unit of currency is explicit and compliant with ISO
+                      4217.
+                    type: number
+                    format: double
+                    multipleOf: 0.01
+                    maximum: 9999999999999.99
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+    PendingTransactions:
+      type: object
+      additionalProperties: false
+      properties:
+        transactions:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              accountId:
+                description: A unique and immutable identifier used to identify the account
+                  resource. This identifier has no meaning to the account owner.
+                maxLength: 40
+                minLength: 1
+                type: string
+              type:
+                enum:
+                  - CREDIT
+                  - DEBIT
+                type: string
+              status:
+                enum:
+                  - POSTED
+                  - PENDING
+                type: string
+              description:
+                description: Unique identifier for the transaction within an servicing
+                  institution. This identifier is both unique and immutable.
+                maxLength: 40
+                minLength: 1
+                type: string
+              transactionDate:
+                format: date
+                description: "Date at which assets become available to the account owner in case
+                  of a credit entry, or cease to be available to the account
+                  owner in case of a debit transaction entry.\r
+
+                  Usage: If transaction entry status is pending and value date
+                  is present, then the value date refers to an
+                  expected/requested value date.\r
+
+                  For transaction entries subject to availability/float and for
+                  which availability information is provided, the value date
+                  must not be used. In this case the availability component
+                  identifies the number of availability days."
+                type: string
+              amount:
+                description: A number of monetary units specified in an active currency where
+                  the unit of currency is explicit and compliant with ISO 4217.
+                type: number
+                format: double
+                multipleOf: 0.01
+                maximum: 9999999999999.99
+    PendingTransaction:
+      type: object
+      additionalProperties: false
+      properties:
+        accountId:
+          description: A unique and immutable identifier used to identify the account
+            resource. This identifier has no meaning to the account owner.
+          maxLength: 40
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - CREDIT
+            - DEBIT
+          type: string
+        status:
+          enum:
+            - POSTED
+            - PENDING
+          type: string
+        description:
+          description: Unique identifier for the transaction within an servicing
+            institution. This identifier is both unique and immutable.
+          maxLength: 40
+          minLength: 1
+          type: string
+        transactionDate:
+          format: date
+          description: "Date at which assets become available to the account owner in case
+            of a credit entry, or cease to be available to the account owner in
+            case of a debit transaction entry.\r
+
+            Usage: If transaction entry status is pending and value date is
+            present, then the value date refers to an expected/requested value
+            date.\r
+
+            For transaction entries subject to availability/float and for which
+            availability information is provided, the value date must not be
+            used. In this case the availability component identifies the number
+            of availability days."
+          type: string
+        amount:
+          description: A number of monetary units specified in an active currency where
+            the unit of currency is explicit and compliant with ISO 4217.
+          type: number
+          format: double
+          multipleOf: 0.01
+          maximum: 9999999999999.99
+    CreditDebitCode:
+      enum:
+        - CREDIT
+        - DEBIT
+      type: string
+    EntryStatusCode:
+      enum:
+        - POSTED
+        - PENDING
+      type: string
+    transferList:
+      required:
+        - beneficiaryAccountId
+        - amount
+        - myReference
+        - theirReference
+      type: object
+      additionalProperties: false
+      properties:
+        beneficiaryAccountId:
+          type: string
+        amount:
+          type: string
+        myReference:
+          type: string
+        theirReference:
+          type: string
+    paymentList:
+      required:
+        - beneficiaryId
+        - amount
+        - myReference
+        - theirReference
+      type: object
+      additionalProperties: false
+      properties:
+        beneficiaryId:
+          type: string
+        amount:
+          type: string
+        myReference:
+          type: string
+        theirReference:
+          type: string
+        authoriserAId:
+          description: If the payment requires authorisation this is derived from
+            profiles/{profileId}/accounts/{accountId}/authorisationsetupdetails.
+          type: string
+        authoriserBId:
+          description: If the payment requires authorisation this is derived from
+            profiles/{profileId}/accounts/{accountId}/authorisationsetupdetails.
+          type: string
+        authPeriodId:
+          description: If the payment requires authorisation this is derived from
+            profiles/{profileId}/accounts/{accountId}/authorisationsetupdetails.
+          type: string
+        fasterPayment:
+          description: If the payment requires authorisation this can be set to true if
+            the beneficiary allows it from
+            profiles/{profileId}/beneficiaries/{accountId}.
+          type: boolean
+    TransferResponse:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          description: Set of elements used to define the transfer status details.
+          additionalProperties: false
+          properties:
+            transferResponse:
+              type: object
+              additionalProperties: false
+              properties:
+                TransferResponses:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      PaymentReferenceNumber:
+                        description: Internal transfer reference number
+                        type: string
+                      PaymentDate:
+                        description: Transfer date
+                        type: string
+                      Status:
+                        description: Transfer outcome status
+                        type: string
+                      BeneficiaryName:
+                        description: Transfer reference used
+                        type: string
+                      BeneficiaryAccountId:
+                        description: Account ID of the destination account
+                        type: string
+                      AuthorisationRequired:
+                        description: Boolean value describing if authorisation is required
+                        type: boolean
+                ErrorMessage:
+                  description: ""
+                  type: string
+                  nullable: true
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+    TransferResponseDataModel:
+      type: object
+      description: Set of elements used to define the transfer status details.
+      additionalProperties: false
+      properties:
+        transferResponse:
+          type: object
+          additionalProperties: false
+          properties:
+            TransferResponses:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  PaymentReferenceNumber:
+                    description: Internal transfer reference number
+                    type: string
+                  PaymentDate:
+                    description: Transfer date
+                    type: string
+                  Status:
+                    description: Transfer outcome status
+                    type: string
+                  BeneficiaryName:
+                    description: Transfer reference used
+                    type: string
+                  BeneficiaryAccountId:
+                    description: Account ID of the destination account
+                    type: string
+                  AuthorisationRequired:
+                    description: Boolean value describing if authorisation is required
+                    type: boolean
+            ErrorMessage:
+              description: ""
+              type: string
+              nullable: true
+    TransferResponseItemModel:
+      type: object
+      additionalProperties: false
+      properties:
+        PaymentReferenceNumber:
+          description: Internal transfer reference number
+          type: string
+        PaymentDate:
+          description: Transfer date
+          type: string
+        Status:
+          description: Transfer outcome status
+          type: string
+        BeneficiaryName:
+          description: Transfer reference used
+          type: string
+        BeneficiaryAccountId:
+          description: Account ID of the destination account
+          type: string
+        AuthorisationRequired:
+          description: Boolean value describing if authorisation is required
+          type: boolean
+    Transfer2:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          description: Set of elements used to define the transfer status details.
+          type: object
+          additionalProperties: false
+          properties:
+            TransferResponses:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  PaymentReferenceNumber:
+                    description: Internal transfer reference number
+                    type: string
+                  PaymentDate:
+                    description: Transfer date
+                    type: string
+                  Status:
+                    description: Transfer outcome status
+                    type: string
+                  BeneficiaryName:
+                    description: Transfer reference used
+                    type: string
+                  BeneficiaryAccountId:
+                    description: Account ID of the destination account
+                    type: string
+                  AuthorisationRequired:
+                    description: Boolean value describing if authorisation is required
+                    type: boolean
+            ErrorMessage:
+              description: ""
+              type: string
+              nullable: true
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+    TransferResponseDataModel2:
+      description: Set of elements used to define the transfer status details.
+      type: object
+      additionalProperties: false
+      properties:
+        TransferResponses:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              PaymentReferenceNumber:
+                description: Internal transfer reference number
+                type: string
+              PaymentDate:
+                description: Transfer date
+                type: string
+              Status:
+                description: Transfer outcome status
+                type: string
+              BeneficiaryName:
+                description: Transfer reference used
+                type: string
+              BeneficiaryAccountId:
+                description: Account ID of the destination account
+                type: string
+              AuthorisationRequired:
+                description: Boolean value describing if authorisation is required
+                type: boolean
+        ErrorMessage:
+          description: ""
+          type: string
+          nullable: true
+    Payment:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          description: Set of elements used to define the transfer status details.
+          type: object
+          additionalProperties: false
+          properties:
+            TransferResponses:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  PaymentReferenceNumber:
+                    description: Internal transfer reference number
+                    type: string
+                  PaymentDate:
+                    description: Transfer date
+                    type: string
+                  Status:
+                    description: Transfer outcome status
+                    type: string
+                  BeneficiaryName:
+                    description: Transfer reference used
+                    type: string
+                  BeneficiaryAccountId:
+                    description: Account ID of the destination account
+                    type: string
+                  AuthorisationRequired:
+                    description: Boolean value describing if authorisation is required
+                    type: boolean
+            ErrorMessage:
+              description: ""
+              type: string
+              nullable: true
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+    PaymentResponseDataModel:
+      description: Set of elements used to define the transfer status details.
+      type: object
+      additionalProperties: false
+      properties:
+        TransferResponses:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              PaymentReferenceNumber:
+                description: Internal transfer reference number
+                type: string
+              PaymentDate:
+                description: Transfer date
+                type: string
+              Status:
+                description: Transfer outcome status
+                type: string
+              BeneficiaryName:
+                description: Transfer reference used
+                type: string
+              BeneficiaryAccountId:
+                description: Account ID of the destination account
+                type: string
+              AuthorisationRequired:
+                description: Boolean value describing if authorisation is required
+                type: boolean
+        ErrorMessage:
+          description: ""
+          type: string
+          nullable: true
+    GetBeneficiaries:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Set of elements used to define the beneficiaries details.
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              beneficiaryId:
+                description: A unique and immutable identifier used to identify the beneficiary
+                  resource. This identifier has no meaning to the account owner.
+                type: string
+              accountNumber:
+                description: The beneficiary bank account number.
+                type: string
+              code:
+                description: The beneficiary bank code.
+                type: string
+              bank:
+                description: The beneficiary bank name.
+                type: string
+              beneficiaryName:
+                description: Beneficiary name.
+                type: string
+              lastPaymentAmount:
+                description: Last payment amount made to the beneficiary.
+                type: string
+              lastPaymentDate:
+                description: Last payment date to the beneficiary.
+                type: string
+              cellNo:
+                description: Notification cell no.
+                type: string
+              emailAddress:
+                description: Notification email address.
+                type: string
+              name:
+                description: Beneficiary name.
+                type: string
+              referenceAccountNumber:
+                description: Reference account number.
+                type: string
+              referenceName:
+                description: Reference name.
+                type: string
+              categoryId:
+                description: Beneficiary category id.
+                type: string
+              profileId:
+                description: Profile id.
+                type: string
+              fasterPaymentAllowed:
+                description: Faster Payment Allowed.
+                type: boolean
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+    Beneficiaries:
+      type: array
+      description: Set of elements used to define the beneficiaries details.
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          beneficiaryId:
+            description: A unique and immutable identifier used to identify the beneficiary
+              resource. This identifier has no meaning to the account owner.
+            type: string
+          accountNumber:
+            description: The beneficiary bank account number.
+            type: string
+          code:
+            description: The beneficiary bank code.
+            type: string
+          bank:
+            description: The beneficiary bank name.
+            type: string
+          beneficiaryName:
+            description: Beneficiary name.
+            type: string
+          lastPaymentAmount:
+            description: Last payment amount made to the beneficiary.
+            type: string
+          lastPaymentDate:
+            description: Last payment date to the beneficiary.
+            type: string
+          cellNo:
+            description: Notification cell no.
+            type: string
+          emailAddress:
+            description: Notification email address.
+            type: string
+          name:
+            description: Beneficiary name.
+            type: string
+          referenceAccountNumber:
+            description: Reference account number.
+            type: string
+          referenceName:
+            description: Reference name.
+            type: string
+          categoryId:
+            description: Beneficiary category id.
+            type: string
+          profileId:
+            description: Profile id.
+            type: string
+          fasterPaymentAllowed:
+            description: Faster Payment Allowed.
+            type: boolean
+    BeneficiaryItem:
+      type: object
+      additionalProperties: false
+      properties:
+        beneficiaryId:
+          description: A unique and immutable identifier used to identify the beneficiary
+            resource. This identifier has no meaning to the account owner.
+          type: string
+        accountNumber:
+          description: The beneficiary bank account number.
+          type: string
+        code:
+          description: The beneficiary bank code.
+          type: string
+        bank:
+          description: The beneficiary bank name.
+          type: string
+        beneficiaryName:
+          description: Beneficiary name.
+          type: string
+        lastPaymentAmount:
+          description: Last payment amount made to the beneficiary.
+          type: string
+        lastPaymentDate:
+          description: Last payment date to the beneficiary.
+          type: string
+        cellNo:
+          description: Notification cell no.
+          type: string
+        emailAddress:
+          description: Notification email address.
+          type: string
+        name:
+          description: Beneficiary name.
+          type: string
+        referenceAccountNumber:
+          description: Reference account number.
+          type: string
+        referenceName:
+          description: Reference name.
+          type: string
+        categoryId:
+          description: Beneficiary category id.
+          type: string
+        profileId:
+          description: Profile id.
+          type: string
+        fasterPaymentAllowed:
+          description: Faster Payment Allowed.
+          type: boolean
+    Beneficiarycategories:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          description: Set of elements used to define the beneficiaries category details.
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              description: A unique and immutable identifier used to identify the beneficiary
+                category resource. This identifier has no meaning to the account
+                owner.
+              type: string
+            isDefault:
+              description: A flag identifying the default category.
+              type: string
+            name:
+              description: The beneficiary category name.
+              type: string
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+    BeneficiarycategoriesDataModel:
+      description: Set of elements used to define the beneficiaries category details.
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          description: A unique and immutable identifier used to identify the beneficiary
+            category resource. This identifier has no meaning to the account
+            owner.
+          type: string
+        isDefault:
+          description: A flag identifying the default category.
+          type: string
+        name:
+          description: The beneficiary category name.
+          type: string
+    GetProfiles:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      properties:
+        data:
+          description: Set of elements used to define the profiles.
+          type: array
+          items:
+            type: object
+            properties:
+              profileId:
+                description: A unique and immutable identifier used to identify the profile
+                  resource. This identifier has no meaning to the account owner.
+                type: string
+              profileName:
+                description: The nickname of the profile, assigned by the account owner in order
+                  to provide an additional means of identification of the
+                  profile.
+                type: string
+              defaultProfile:
+                description: Value describing if the profile is the default for the user.
+                type: boolean
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+    Profiles:
+      description: Set of elements used to define the profiles.
+      type: array
+      items:
+        type: object
+        properties:
+          profileId:
+            description: A unique and immutable identifier used to identify the profile
+              resource. This identifier has no meaning to the account owner.
+            type: string
+          profileName:
+            description: The nickname of the profile, assigned by the account owner in order
+              to provide an additional means of identification of the profile.
+            type: string
+          defaultProfile:
+            description: Value describing if the profile is the default for the user.
+            type: boolean
+    GetAuthsetup:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      properties:
+        data:
+          description: Set of elements used to define the authorisation setup details for
+            the profile and account combination.
+          type: object
+          properties:
+            numberOfAuthorisationRequired:
+              description: The number of authorisors needed for a payment.
+              type: string
+            period:
+              description: ""
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    description: Period ID.
+                    type: string
+                  description:
+                    description: Period description for the amount of days the payment will be valid
+                      for until it expires if not approved.
+                    type: string
+            authorisersListA:
+              description: ""
+              type: array
+              items:
+                type: object
+                properties:
+                  authoriserId:
+                    description: Authoriser A ID used when doing payments requiring authorisations
+                      where numberOfAuthorisationRequired is 1.
+                    type: string
+                  name:
+                    description: Authoriser A name.
+                    type: string
+            authorisersListB:
+              description: ""
+              type: array
+              items:
+                type: object
+                properties:
+                  authoriserId:
+                    description: Authoriser B ID used when doing payments requiring authorisations
+                      where numberOfAuthorisationRequired is 2.
+                    type: string
+                  name:
+                    description: Authoriser B name.
+                    type: string
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+    Authsetup:
+      description: Set of elements used to define the authorisation setup details for
+        the profile and account combination.
+      type: object
+      properties:
+        numberOfAuthorisationRequired:
+          description: The number of authorisors needed for a payment.
+          type: string
+        period:
+          description: ""
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                description: Period ID.
+                type: string
+              description:
+                description: Period description for the amount of days the payment will be valid
+                  for until it expires if not approved.
+                type: string
+        authorisersListA:
+          description: ""
+          type: array
+          items:
+            type: object
+            properties:
+              authoriserId:
+                description: Authoriser A ID used when doing payments requiring authorisations
+                  where numberOfAuthorisationRequired is 1.
+                type: string
+              name:
+                description: Authoriser A name.
+                type: string
+        authorisersListB:
+          description: ""
+          type: array
+          items:
+            type: object
+            properties:
+              authoriserId:
+                description: Authoriser B ID used when doing payments requiring authorisations
+                  where numberOfAuthorisationRequired is 2.
+                type: string
+              name:
+                description: Authoriser B name.
+                type: string
+    GetDocuments:
+      required:
+        - data
+        - links
+        - meta
+      type: object
+      properties:
+        data:
+          description: Set of elements used to define the documents.
+          type: array
+          items:
+            type: object
+            properties:
+              documentType:
+                description: The type of documents available.
+                type: string
+              documentDate:
+                description: The date of the document(s).
+                type: string
+                format: date
+        meta:
+          description: Meta Data relevant to the payload
+          type: object
+          additionalProperties: false
+          properties:
+            totalPages:
+              format: int32
+              type: integer
+        links:
+          description: Links relevant to the payload
+          required:
+            - self
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+    Documents:
+      description: Set of elements used to define the documents.
+      type: array
+      items:
+        type: object
+        properties:
+          documentType:
+            description: The type of documents available.
+            type: string
+          documentDate:
+            description: The date of the document(s).
+            type: string
+            format: date
+externalDocs:
+  url: https://developer.investec.com/docs
+  description: ""
+security:
+  - x-api-key: []
+    OAuth2Sandbox: []
