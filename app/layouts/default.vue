@@ -33,8 +33,8 @@ const total = computed(() => (meta.value?.accounts ?? []).reduce((s: number, a: 
         <div class="flex items-center gap-2.5 px-1">
           <div class="size-8 rounded-lg bg-primary text-white grid place-items-center font-bold text-sm shrink-0">R</div>
           <div v-if="!collapsed" class="leading-tight">
-            <div class="font-semibold text-sm">Randkeeper</div>
-            <div class="text-[11px] text-muted">Private ledger</div>
+            <div class="font-semibold text-sm flex items-center gap-1.5">Randkeeper<UBadge v-if="meta?.demo" size="sm" color="warning" variant="subtle">Demo</UBadge></div>
+            <div class="text-[11px] text-muted">{{ meta?.demo ? 'Mock data — not your bank' : 'Private ledger' }}</div>
           </div>
         </div>
       </template>
