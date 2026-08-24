@@ -39,7 +39,7 @@ const sections = computed(() => SECTIONS.map(s => {
   const rs = rows.value.filter(r => r.tranche === s.key)
   const groups = SPENDING_GROUPS.map(g => {
     const grs = rs.filter(r => r.groupId === g.id).sort(bySort[sort.value])
-    return { g, rows: grs, spent: grs.reduce((a, r) => a + r.spent, 0), budget: grs.reduce((a, r) => a + (r.budget ?? 0), 0), hasBudget: grs.some(r => r.budget != null) }
+    return { g, rows: grs, spent: grs.reduce((a, r) => a + r.spent, 0), budget: grs.reduce((a, r) => a + (r.budget ?? 0), 0) }
   }).filter(x => x.rows.length)
   const spent = rs.reduce((a, r) => a + r.spent, 0), budget = rs.reduce((a, r) => a + (r.budget ?? 0), 0)
   const target = (d.value?.income ?? 0) * s.target
@@ -175,11 +175,11 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
         <StatusBar v-if="s.key !== 'none'" class="mt-2" :value="s.pct" :target="s.target / (d.income || 1)" :color="s.barTone" />
       </div>
 
-      <template v-for="{ g, rows: rs, spent: gSpent, budget: gBudget, hasBudget } in s.groups" :key="g.id">
+      <template v-for="{ g, rows: rs, spent: gSpent, budget: gBudget } in s.groups" :key="g.id">
         <template v-if="!collapsed[s.key]">
         <div class="flex items-center justify-between bg-default px-4 py-1.5 border-t border-default text-xs uppercase tracking-wide text-muted">
           <span class="flex items-center gap-1.5"><UIcon :name="g.icon" :class="g.color" class="size-3.5" />{{ g.name }}</span>
-          <span class="tnum"><b class="text-highlighted">{{ money(gSpent) }}</b><template v-if="hasBudget"> / {{ money(gBudget) }} · <span :class="diffTone(gSpent, gBudget)">{{ diff(gSpent, gBudget) }}</span></template></span>
+          <span class="tnum"><b class="text-highlighted">{{ money(gSpent) }}</b> / {{ money(gBudget) }} · <span :class="diffTone(gSpent, gBudget)">{{ diff(gSpent, gBudget) }}</span></span>
         </div>
         <div v-for="r in rs" :key="r.categoryId + r.tranche" class="grid grid-cols-[1fr_auto_auto] items-center gap-4 px-4 py-2.5 border-t border-default">
           <div class="min-w-0">
