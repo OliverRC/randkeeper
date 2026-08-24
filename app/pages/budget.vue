@@ -139,7 +139,7 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
         <div class="flex items-center gap-3">
           <UBadge v-if="totalSpent > d.income" color="error" variant="subtle" icon="i-lucide-triangle-alert">Overspent by {{ money(totalSpent - d.income) }}</UBadge>
           <UBadge v-else color="success" variant="subtle" icon="i-lucide-circle-check">{{ money(d.income - totalSpent) }} unallocated</UBadge>
-          <div class="tnum font-semibold text-rose-600">{{ money(totalSpent) }}<span v-if="totalBudget" class="text-muted font-normal text-sm"> / {{ money(totalBudget) }} budgeted</span></div>
+          <div class="tnum font-semibold text-rose-600">{{ money(totalSpent) }}<span v-if="totalBudget" class="text-muted font-normal text-sm"> / {{ money(totalBudget) }}</span></div>
         </div>
       </div>
 
@@ -162,7 +162,7 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
               :text="s.good === 'under' ? `You've budgeted ${money(s.budget)} for ${s.label.toLowerCase()} but the ${pct(s.target / (d.income || 1))} target is ${money(s.target)}. Even on budget you'd miss 50/30/20.` : `You've only budgeted ${money(s.budget)} for savings; the ${pct(s.target / (d.income || 1))} target is ${money(s.target)}.`">
               <UBadge color="warning" variant="subtle" icon="i-lucide-triangle-alert" size="sm">budget {{ s.good === 'under' ? 'over' : 'under' }} target by {{ money(Math.abs(s.budget - s.target)) }}</UBadge>
             </UTooltip>
-            <span><b>{{ money(s.spent) }}</b><span v-if="s.budget" class="text-muted"> / {{ money(s.budget) }} budgeted</span></span>
+            <span><b>{{ money(s.spent) }}</b><span v-if="s.budget" class="text-muted"> / {{ money(s.budget) }}</span></span>
           </div>
         </div>
         <StatusBar v-if="s.key !== 'none'" class="mt-2" :value="s.pct" :target="s.target / (d.income || 1)" :color="s.barTone" />
@@ -172,7 +172,7 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
         <template v-if="!collapsed[s.key]">
         <div class="flex items-center justify-between bg-default px-4 py-1.5 border-t border-default text-xs uppercase tracking-wide text-muted">
           <span class="flex items-center gap-1.5"><UIcon :name="g.icon" :class="g.color" class="size-3.5" />{{ g.name }}</span>
-          <span class="tnum"><b class="text-highlighted">{{ money(rs.reduce((a: number, r: any) => a + r.spent, 0)) }}</b><template v-if="rs.some((r: any) => r.budget != null)"> / {{ money(rs.reduce((a: number, r: any) => a + (r.budget ?? 0), 0)) }} budgeted</template></span>
+          <span class="tnum"><b class="text-highlighted">{{ money(rs.reduce((a: number, r: any) => a + r.spent, 0)) }}</b><template v-if="rs.some((r: any) => r.budget != null)"> / {{ money(rs.reduce((a: number, r: any) => a + (r.budget ?? 0), 0)) }}</template></span>
         </div>
         <div v-for="r in rs" :key="r.categoryId + r.tranche" class="grid grid-cols-[1fr_auto_auto] items-center gap-4 px-4 py-2.5 border-t border-default">
           <div class="min-w-0">
