@@ -112,7 +112,7 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
       <template v-for="{ g, rows: rs } in incomeGroups" :key="g.id">
         <div class="flex items-center justify-between bg-default px-4 py-1.5 border-t border-default text-xs uppercase tracking-wide text-muted">
           <span class="flex items-center gap-1.5"><UIcon :name="g.icon" :class="g.color" class="size-3.5" />{{ g.name }}</span>
-          <span class="tnum">{{ money(rs.reduce((a: number, r: any) => a + r.total, 0)) }}</span>
+          <span class="tnum"><b class="text-highlighted">{{ money(rs.reduce((a: number, r: any) => a + r.total, 0)) }}</b><template v-if="rs.some((r: any) => r.budget != null)"> / {{ money(rs.reduce((a: number, r: any) => a + (r.budget ?? 0), 0)) }} expected</template></span>
         </div>
         <div v-for="r in rs" :key="r.categoryId" class="grid grid-cols-[1fr_auto_auto] items-center gap-4 px-4 py-2.5 border-t border-default">
           <div class="min-w-0">
@@ -172,7 +172,7 @@ const zar = { style: 'currency', currency: 'ZAR', currencyDisplay: 'narrowSymbol
         <template v-if="!collapsed[s.key]">
         <div class="flex items-center justify-between bg-default px-4 py-1.5 border-t border-default text-xs uppercase tracking-wide text-muted">
           <span class="flex items-center gap-1.5"><UIcon :name="g.icon" :class="g.color" class="size-3.5" />{{ g.name }}</span>
-          <span class="tnum">{{ money(rs.reduce((a: number, r: any) => a + r.spent, 0)) }}</span>
+          <span class="tnum"><b class="text-highlighted">{{ money(rs.reduce((a: number, r: any) => a + r.spent, 0)) }}</b><template v-if="rs.some((r: any) => r.budget != null)"> / {{ money(rs.reduce((a: number, r: any) => a + (r.budget ?? 0), 0)) }} budgeted</template></span>
         </div>
         <div v-for="r in rs" :key="r.categoryId + r.tranche" class="grid grid-cols-[1fr_auto_auto] items-center gap-4 px-4 py-2.5 border-t border-default">
           <div class="min-w-0">
